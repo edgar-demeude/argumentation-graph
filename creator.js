@@ -1,5 +1,5 @@
 /* ============================================================
-   creator.js — Left panel: new argument creation form
+   creator.js — Left panel: argument creation & editing
    ============================================================
    Call: initCreatorPanel(graphState)
    ============================================================ */
@@ -7,22 +7,26 @@
 function initCreatorPanel(gs) {
   const { data, nodes } = gs;
 
-  /* ── State: tag lists ─────────────────────────────────── */
-  let attacksTags    = [];   // IDs this new node attacks
-  let attackedByTags = [];   // IDs that attack this new node
+  /* ── State ────────────────────────────────────────────── */
+  let attacksTags    = [];
+  let attackedByTags = [];
+  let editingId      = null;   // null = create mode, string = edit mode
 
   /* ── DOM references ───────────────────────────────────── */
-  const inputId         = document.getElementById('new-id');
-  const inputLabel      = document.getElementById('new-label');
-  const selectCat       = document.getElementById('new-cat');
-  const textaDesc       = document.getElementById('new-desc');
-  const attacksInput    = document.getElementById('attacks-input');
-  const attacksByInput  = document.getElementById('attackedby-input');
-  const attacksTags_el  = document.getElementById('attacks-tags');
-  const attacksByTags_el= document.getElementById('attackedby-tags');
-  const createBtn       = document.getElementById('btn-create');
-  const formError       = document.getElementById('form-error');
-  const panelTitle      = document.querySelector('.sidebar-left .panel-header h2');
+  const inputId          = document.getElementById('new-id');
+  const inputLabel       = document.getElementById('new-label');
+  const selectCat        = document.getElementById('new-cat');
+  const textaDesc        = document.getElementById('new-desc');
+  const attacksInput     = document.getElementById('attacks-input');
+  const attacksByInput   = document.getElementById('attackedby-input');
+  const attacksTags_el   = document.getElementById('attacks-tags');
+  const attacksByTags_el = document.getElementById('attackedby-tags');
+  const formError        = document.getElementById('form-error');
+  const btnRow           = document.getElementById('form-btn-row');
+  const btnCreate        = document.getElementById('btn-create');
+  const btnUpdate        = document.getElementById('btn-update');
+  const btnDelete        = document.getElementById('btn-delete');
+  const panelTitle       = document.querySelector('.sidebar-left .panel-header h2');
 
   /* ── Populate category dropdown ───────────────────────── */
   Object.entries(data.cats).forEach(([key, label]) => {
@@ -41,15 +45,8 @@ function initCreatorPanel(gs) {
     return `A${max + 1}`;
   }
 
-  function refreshId() {
-    inputId.value = nextId();
-  }
-
-  refreshId();
-
-  /* ── Tag input helpers ────────────────────────────────── */
+  /* ── Datalists ────────────────────────────────────────── */
   function buildDatalist() {
-    // Rebuild datalists with current node IDs (called when graph changes)
     ['attacks-list', 'attackedby-list'].forEach(listId => {
       const dl = document.getElementById(listId);
       dl.innerHTML = '';
@@ -60,9 +57,9 @@ function initCreatorPanel(gs) {
       });
     });
   }
-
   buildDatalist();
 
+  /* ── Tag rendering ────────────────────────────────────── */
   function renderTags(arr, container, color) {
     container.innerHTML = arr.map(id => `
       <span class="creator-tag" style="border-color:${color}44;color:${color}">
@@ -81,7 +78,6 @@ function initCreatorPanel(gs) {
   }
 
   function renderAllTags() {
-    const color = data.colors[selectCat.value] || '#7a9e80';
     renderTags(attacksTags,    attacksTags_el,   '#e07777');
     renderTags(attackedByTags, attacksByTags_el, '#5dba6f');
   }
@@ -89,62 +85,66 @@ function initCreatorPanel(gs) {
   function addTag(inputEl, arr) {
     const val = inputEl.value.trim().toUpperCase();
     if (!val) return;
-    // Allow any ID: existing or future
-    if (!arr.includes(val)) {
-      arr.push(val);
-      renderAllTags();
-    }
+    if (!arr.includes(val)) { arr.push(val); renderAllTags(); }
     inputEl.value = '';
   }
 
-  // Reset form to blank "create" state
+  /* ── Mode switching ───────────────────────────────────── */
+  function setCreateMode() {
+    editingId = null;
+    btnRow.classList.remove('edit-mode');
+    if (panelTitle) panelTitle.textContent = 'New argument';
+    resetDeleteBtn();
+  }
+
+  function setEditMode(id) {
+    editingId = id;
+    btnRow.classList.add('edit-mode');
+    if (panelTitle) panelTitle.textContent = 'Update argument';
+    resetDeleteBtn();
+  }
+
+  /* ── Reset form ───────────────────────────────────────── */
   function resetForm() {
     attacksTags    = [];
     attackedByTags = [];
     renderAllTags();
-    inputLabel.value = '';
-    textaDesc.value  = '';
+    inputLabel.value  = '';
+    textaDesc.value   = '';
+    formError.textContent = '';
     buildDatalist();
-    refreshId();
-    formError.textContent      = '';
-    createBtn.textContent      = 'Create argument';
-    createBtn.style.background = '';
-    if (panelTitle) panelTitle.textContent = 'New argument';
+    inputId.value = nextId();
+    setCreateMode();
   }
 
-  // Expose reset so ui.js can call it on deselect
   gs.resetCreatorForm = resetForm;
 
-  // Populate form for editing an existing node
+  /* ── Fill form for editing ────────────────────────────── */
   gs.fillCreatorForm = function(node) {
     inputId.value    = node.id;
     inputLabel.value = node.label.replace(/\n/g, '\\n');
     selectCat.value  = node.cat;
     textaDesc.value  = node.desc || '';
-
-    attacksTags    = [...node.attacks];
-    attackedByTags = [...node.attackedBy];
+    attacksTags      = [...node.attacks];
+    attackedByTags   = [...node.attackedBy];
+    formError.textContent = '';
     renderAllTags();
-
-    createBtn.textContent = 'Update argument';
-    if (panelTitle) panelTitle.textContent = 'Update argument';
+    setEditMode(node.id);
   };
 
-  // Modify the Create Button listener
-  createBtn.addEventListener('click', () => {
-    formError.textContent = ''; //
-
+  /* ── Collect form data ────────────────────────────────── */
+  function collectFormData() {
     const id    = inputId.value.trim();
     const label = inputLabel.value.trim();
     const cat   = selectCat.value;
     const desc  = textaDesc.value.trim();
 
-    if (!id || !label || !cat) { 
-      formError.textContent = 'ID, Label, and Category are required.'; 
-      return; 
+    if (!id || !label || !cat) {
+      formError.textContent = 'ID, Label, and Category are required.';
+      return null;
     }
-
-    const newNodeData = {
+    formError.textContent = '';
+    return {
       id,
       label:      label.replace(/\\n/g, '\n'),
       cat,
@@ -152,38 +152,77 @@ function initCreatorPanel(gs) {
       attacks:    [...attacksTags],
       attackedBy: [...attackedByTags],
     };
+  }
 
-    // Check if we are updating or creating
-    const existingNode = nodes.find(n => n.id === id);
-    if (existingNode) {
-      gs.updateNode(id, newNodeData);  // syncs links + redraws
+  /* ── CREATE button ────────────────────────────────────── */
+  btnCreate.addEventListener('click', () => {
+    const nodeData = collectFormData();
+    if (!nodeData) return;
+
+    if (nodes.find(n => n.id === nodeData.id)) {
+      formError.textContent = `ID "${nodeData.id}" already exists.`;
+      return;
+    }
+
+    gs.addNode(nodeData);
+    if (gs.recalculate) gs.recalculate();
+
+    resetForm();
+
+    btnCreate.textContent      = '✓ Created!';
+    btnCreate.style.background = data.colors[nodeData.cat] + '33';
+    setTimeout(() => {
+      btnCreate.textContent      = 'Create argument';
+      btnCreate.style.background = '';
+    }, 1500);
+  });
+
+  /* ── UPDATE button ────────────────────────────────────── */
+  btnUpdate.addEventListener('click', () => {
+    const nodeData = collectFormData();
+    if (!nodeData) return;
+    if (!editingId) return;
+
+    // updateNode: rebuilds links, redraws, recomputes
+    gs.updateNode(editingId, nodeData);
+    if (gs.recalculate) gs.recalculate();
+    if (gs.deselect)    gs.deselect();   // clears highlight + calls resetForm via gs.resetCreatorForm
+
+    btnUpdate.textContent      = '✓ Updated!';
+    btnUpdate.style.background = data.colors[nodeData.cat] + '33';
+    setTimeout(() => {
+      btnUpdate.textContent      = 'Update argument';
+      btnUpdate.style.background = '';
+    }, 1500);
+  });
+
+  /* ── DELETE button ────────────────────────────────────── */
+  function resetDeleteBtn() {
+    btnDelete.textContent      = 'Delete argument';
+    btnDelete.dataset.confirm  = 'false';
+    btnDelete.style.background = '';
+  }
+
+  btnDelete.addEventListener('click', () => {
+    if (!editingId) return;
+
+    if (btnDelete.dataset.confirm === 'true') {
+      // Confirmed — delete
+      gs.removeNode(editingId);
       if (gs.recalculate) gs.recalculate();
-      if (gs.deselect)    gs.deselect();
-      resetForm();
-
-      // Brief feedback before form is already reset
-      createBtn.textContent      = '✓ Updated!';
-      createBtn.style.background = data.colors[cat] + '33';
-      setTimeout(() => {
-        createBtn.textContent      = 'Create argument';
-        createBtn.style.background = '';
-      }, 1500);
+      if (gs.deselect)    gs.deselect();  // resets form too
     } else {
-      gs.addNode(newNodeData); // Create new
-      if (gs.recalculate) gs.recalculate();
-
-      resetForm();
-
-      // Feedback
-      createBtn.textContent      = '✓ Created!';
-      createBtn.style.background = data.colors[cat] + '33';
+      // First click — ask for confirmation
+      btnDelete.textContent     = '⚠ Confirm?';
+      btnDelete.dataset.confirm = 'true';
+      btnDelete.style.background = '#c0392b44';
       setTimeout(() => {
-        createBtn.textContent      = 'Create argument';
-        createBtn.style.background = '';
-      }, 1500);
+        if (btnDelete.dataset.confirm === 'true') resetDeleteBtn();
+      }, 3000);
     }
   });
 
+  /* ── Tag keyboard/button listeners ───────────────────── */
   attacksInput.addEventListener('keydown', e => {
     if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); addTag(attacksInput, attacksTags); }
   });

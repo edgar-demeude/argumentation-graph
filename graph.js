@@ -16,11 +16,11 @@ const GRAPH_CONFIG = {
   idFontSize:       10,
   linkDistance:     145,
   linkStrength:     0.5,
-  chargeStrength:  -130,
-  collideRadius:    80,
+  chargeStrength:  -430,
+  collideRadius:    68,
   zoomMin:          0.3,
   zoomMax:          3.0,
-  curvature:        0.0,
+  curvature:        1.5,
 };
 
 function initGraph(data) {
@@ -224,6 +224,43 @@ function initGraph(data) {
       .text(d => (d.score || 0).toFixed(2));
   }
 
+  /* ── updateNodeVisuals: refresh all visual attrs on existing nodes ── */
+  function updateNodeVisuals() {
+    if (!nodeSel) return;
+
+    // Background fill + border color
+    nodeSel.selectAll('.node-bg')
+      .attr('fill',   d => data.colors[d.cat] + '22')
+      .attr('stroke', d => data.colors[d.cat]);
+
+    // Score ring color
+    nodeSel.selectAll('.score-ring')
+      .attr('stroke', d => data.colors[d.cat]);
+
+    // Score text color
+    nodeSel.selectAll('.node-score')
+      .attr('fill', d => data.colors[d.cat]);
+
+    // ID badge color + text
+    nodeSel.selectAll('.node-id')
+      .attr('fill', d => data.colors[d.cat])
+      .text(d => d.id);
+
+    // Label lines — remove old, rebuild
+    nodeSel.each(function(d) {
+      const grp = d3.select(this);
+      grp.selectAll('.node-label').remove();
+      const lines = d.label.split('\n');
+      lines.forEach((line, i) => {
+        grp.append('text')
+          .attr('class',     'node-label')
+          .attr('y',         (i - (lines.length - 1) / 2) * 13)
+          .attr('font-size', GRAPH_CONFIG.labelFontSize + 'px')
+          .text(line);
+      });
+    });
+  }
+
   /* ── Tick ─────────────────────────────────────────────── */
   sim.on('tick', () => {
     if (!linkSel || !nodeSel) return;
@@ -325,6 +362,7 @@ function initGraph(data) {
     });
 
     updateGraph();
+    updateNodeVisuals();
   }
 
   /* ── removeNode: public API ──────────────────────────── */
@@ -396,6 +434,7 @@ function initGraph(data) {
     nodes, links,
     updateGraph,
     updateNodeScores,
+    updateNodeVisuals,
     addNode,
     updateNode,
     removeNode,

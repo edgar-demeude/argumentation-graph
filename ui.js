@@ -31,8 +31,9 @@ function initDetailPanel(gs) {
     // 2. Push scores onto node objects
     gs.nodes.forEach(n => { n.score = nodeScores[n.id] || 0; });
 
-    // 3. Refresh graph visuals
+    // 3. Refresh graph visuals (scores + colors/labels for any edited nodes)
     gs.updateNodeScores();
+    if (gs.updateNodeVisuals) gs.updateNodeVisuals();
 
     // 4. Weighted final average (same weights as semantics)
     const result = aggregateScores(gs.nodes, categoryWeights);
@@ -132,20 +133,7 @@ function initDetailPanel(gs) {
       { note: 'An attacker b with low dimension weight ω has less power to reduce σ(a). Solved iteratively until convergence.' },
     ]);
 
-    // ── Block 2 : Final score ────────────────────────────
-    const isBalanced = Math.abs(sliderV - 0.5) < 0.005;
-    const finalTex = isBalanced
-      ? String.raw`\overline{\sigma} \;=\; \frac{1}{|\mathcal{C}|} \sum_{c\,\in\,\mathcal{C}} \mu_c`
-      : String.raw`\overline{\sigma} \;=\; \frac{\displaystyle\sum_{c\,\in\,\mathcal{C}} \omega_c \cdot \mu_c}{\displaystyle\sum_{c\,\in\,\mathcal{C}} \omega_c}`;
-
-    addBlock('Final score', [
-      { tex: finalTex },
-      { note: isBalanced
-          ? 'Equal-weight average of all dimension means (balanced).'
-          : 'Weighted average: dimensions with higher ω contribute more to the final score.' },
-    ]);
-
-    // ── Block 3 : Notation ───────────────────────────────
+    // ── Block 2 : Notation ───────────────────────────────
     addBlock('Notation', [
       { tex: String.raw`a, b \in \mathcal{A}` },
       { note: 'arguments in the graph' },
@@ -157,8 +145,6 @@ function initDetailPanel(gs) {
       { note: 'gradual acceptability score of a' },
       { tex: String.raw`\omega_c \in [0, 1]` },
       { note: 'importance weight of dimension c' },
-      { tex: String.raw`\mu_c` },
-      { note: 'mean score of arguments in dimension c' },
     ]);
   }
 

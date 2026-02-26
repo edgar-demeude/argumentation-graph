@@ -16,6 +16,17 @@
     .formula-math .katex-display { margin: 4px 0; }
     .formula-note { font-family: 'DM Sans', sans-serif; font-size: 11px; color: #7a8e7c; line-height: 1.5; margin-top: 6px; font-style: italic; white-space: pre-line; }
     .formula-note--small { font-size: 10px; }
+    /* Dual button row */
+    .form-btn-row { display: flex; gap: 8px; }
+    .form-btn-create { flex: 1; }
+    .form-btn-update { flex: 1; display: none; }
+    .form-btn-delete { flex: 1; display: none; }
+    .form-btn-row.edit-mode .form-btn-create { display: none; }
+    .form-btn-row.edit-mode .form-btn-update { display: block; }
+    .form-btn-row.edit-mode .form-btn-delete { display: block; }
+    :root { --action: #9b8fd4; }
+    .legend-hint { font-size: 10px; color: #7a8e7c; margin-left: 4px; font-style: italic; }
+    .weight-hint { font-size: 10px; color: #7a8e7c; margin-top: 6px; font-style: italic; }
   </style>
 </head>
 <body>
@@ -97,8 +108,12 @@
         <!-- Error message -->
         <div class="form-error" id="form-error"></div>
 
-        <!-- Submit -->
-        <button id="btn-create" class="create-btn">Create argument</button>
+        <!-- Buttons: single in create mode, dual in edit mode -->
+        <div class="form-btn-row" id="form-btn-row">
+          <button id="btn-create" class="create-btn form-btn-create">Create argument</button>
+          <button id="btn-update" class="create-btn form-btn-update">Update argument</button>
+          <button id="btn-delete" class="delete-btn form-btn-delete" data-confirm="false">Delete argument</button>
+        </div>
 
       </div>
     </div>
