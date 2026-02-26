@@ -1,0 +1,177 @@
+{
+  "colors": {
+    "env":  "#4caf78",
+    "eco":  "#da5d4d",
+    "care": "#5bafd6",
+    "just": "#b07de8",
+    "prag": "#dca450"
+  },
+  "cats": {
+    "env":  "Environmental ethics",
+    "eco":  "Economic value",
+    "care": "Ethics of care",
+    "just": "Intergenerational justice",
+    "prag": "Pragmatic argument"
+  },
+  "globalScores": [
+    { "label": "Env.",      "cat": "env",  "value": 0.72 },
+    { "label": "Economic",  "cat": "eco",  "value": 0.31 },
+    { "label": "Care",      "cat": "care", "value": 0.68 },
+    { "label": "Intergene", "cat": "just", "value": 0.79 }
+  ],
+  "nodes": [
+    {
+      "id": "A1",
+      "label": "Pesticides\nmaximise\nyield",
+      "cat": "eco",
+      "score": 0.42,
+      "desc": "Utilitarian argument: increasing yield justifies the use of chemical inputs. Rooted in a short-term productive efficiency ethics.",
+      "attacks":    ["A17"],
+      "attackedBy": ["A2", "A3"]
+    },
+    {
+      "id": "A2",
+      "label": "Pesticides\ndestroy\nbiodiversity",
+      "cat": "env",
+      "score": 0.78,
+      "desc": "Empirical and ethical argument: pesticides reduce species diversity, irreversibly damaging the ecosystem. Intrinsic value of non-human life.",
+      "attacks":    ["A1"],
+      "attackedBy": ["A4"]
+    },
+    {
+      "id": "A3",
+      "label": "Biodiversity\nhas intrinsic\nvalue",
+      "cat": "env",
+      "score": 0.85,
+      "desc": "Fundamental ethical principle (deep ecology): species have value independent of their utility to humans. Basis of biocentric environmental ethics.",
+      "attacks":    ["A1", "A9"],
+      "attackedBy": []
+    },
+    {
+      "id": "A4",
+      "label": "Profitability\njustifies\nchemical inputs",
+      "cat": "eco",
+      "score": 0.28,
+      "desc": "Anthropocentric and economic argument: economic efficiency takes precedence over ecological considerations. A short-sighted view of value.",
+      "attacks":    ["A2", "A15"],
+      "attackedBy": ["A5", "A14", "A15"]
+    },
+    {
+      "id": "A5",
+      "label": "Long-term\nsoil health\ncomes first",
+      "cat": "env",
+      "score": 0.80,
+      "desc": "Sustainability argument: preserving soil structure and microbial life is a necessary condition for any future agriculture. Ethics of responsibility.",
+      "attacks":    ["A4", "A13"],
+      "attackedBy": []
+    },
+    {
+      "id": "A6",
+      "label": "Composting\nfertilises\nnaturally",
+      "cat": "env",
+      "score": 0.76,
+      "desc": "Practical and ecological solution: compost maintains fertility without degrading the ecosystem, supported by soil science. Convergent argument between efficiency and ethics.",
+      "attacks":    ["A7"],
+      "attackedBy": ["A7"]
+    },
+    {
+      "id": "A7",
+      "label": "Eco-gardening\nis too\ndemanding",
+      "cat": "prag",
+      "score": 0.35,
+      "desc": "Practical objection: the time and skills required by ecological practices represent a real barrier for most amateur gardeners.",
+      "attacks":    ["A6"],
+      "attackedBy": ["A6"]
+    },
+    {
+      "id": "A8",
+      "label": "Native plants\nsupport the\necosystem",
+      "cat": "env",
+      "score": 0.82,
+      "desc": "Ecosystem argument: native plant species provide habitat and food for local fauna, reinforcing trophic networks. Functional and intrinsic value.",
+      "attacks":    ["A9"],
+      "attackedBy": []
+    },
+    {
+      "id": "A9",
+      "label": "Killing pests\nprotects\ncrops",
+      "cat": "eco",
+      "score": 0.33,
+      "desc": "Instrumental justification: pest insects cause economic losses, legitimising their elimination. Ignores the moral value of invertebrates.",
+      "attacks":    ["A16"],
+      "attackedBy": ["A3", "A8", "A10", "A16"]
+    },
+    {
+      "id": "A10",
+      "label": "Insects have\nmoral\nvalue",
+      "cat": "care",
+      "score": 0.71,
+      "desc": "Ethics of care extended to invertebrates: even insects, capable of feeling, deserve moral consideration. Sentientist or biocentric approach.",
+      "attacks":    ["A9"],
+      "attackedBy": []
+    },
+    {
+      "id": "A11",
+      "label": "Intensive\nirrigation\nwastes water",
+      "cat": "prag",
+      "score": 0.67,
+      "desc": "Empirical argument: excessive watering depletes groundwater and contributes to regional water stress, particularly in the context of climate change.",
+      "attacks":    [],
+      "attackedBy": ["A12", "A15", "A17"]
+    },
+    {
+      "id": "A12",
+      "label": "Rainwater\nharvesting is\naccessible",
+      "cat": "prag",
+      "score": 0.73,
+      "desc": "Pragmatic counter-measure: simple, low-cost solutions (tanks, mulching) make it possible to reconcile gardening with water resource conservation.",
+      "attacks":    ["A11"],
+      "attackedBy": []
+    },
+    {
+      "id": "A13",
+      "label": "Chemical\nfertilisers\nare effective",
+      "cat": "eco",
+      "score": 0.38,
+      "desc": "Immediate efficiency argument: synthetic fertilisers provide rapidly assimilable nutrients, optimising short-term growth.",
+      "attacks":    [],
+      "attackedBy": ["A5", "A14"]
+    },
+    {
+      "id": "A14",
+      "label": "Chemical\nfertilisers\ndegrade soil",
+      "cat": "env",
+      "score": 0.77,
+      "desc": "Empirical and ethical rebuttal: acidification, salinisation and destruction of microfauna are documented long-term effects of chemical fertilisers.",
+      "attacks":    ["A4", "A13"],
+      "attackedBy": []
+    },
+    {
+      "id": "A15",
+      "label": "Future generations\nhave a right to\nhealthy ecosystems",
+      "cat": "just",
+      "score": 0.88,
+      "desc": "Intergenerational justice (Rawls, Jonas): we have a moral obligation to pass on a viable environment. Principle of responsibility towards the future.",
+      "attacks":    ["A4", "A11"],
+      "attackedBy": ["A4"]
+    },
+    {
+      "id": "A16",
+      "label": "Pollinators\nare ecologically\nindispensable",
+      "cat": "env",
+      "score": 0.90,
+      "desc": "Functional and ethical argument: bees and other pollinators ensure the reproduction of 80% of flowering plants. Their decline directly threatens food security.",
+      "attacks":    ["A9"],
+      "attackedBy": ["A9"]
+    },
+    {
+      "id": "A17",
+      "label": "Preserving\nwater is a\nmoral duty",
+      "cat": "just",
+      "score": 0.84,
+      "desc": "Water is a threatened global common good. Its preservation is a matter of global ethical responsibility — towards living and yet-to-be-born humans, and towards other species.",
+      "attacks":    ["A11"],
+      "attackedBy": ["A1"]
+    }
+  ]
+}

@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Argumentation Graph — Ecological Gardening Ethics</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Mono:wght@300;400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <header>
+    <h1>🌿 Argumentation Graph — Ecological Gardening</h1>
+    <span>GRADUAL SEMANTICS · ETHICAL REASONING · ATTACK GRAPH</span>
+    <button id="btn-export" class="export-btn">Export JSON</button>
+  </header>
+
+  <div class="workspace">
+
+    <!-- ════════════════════════════════════════════════════
+         LEFT PANEL — New argument creator
+         ════════════════════════════════════════════════════ -->
+    <div class="sidebar sidebar-left">
+
+      <div class="panel-header">
+        <h2>New argument</h2>
+      </div>
+
+      <div class="creator-form">
+
+        <!-- ID -->
+        <div class="field-group">
+          <label for="new-id">ID</label>
+          <input id="new-id" type="text" class="field-input" placeholder="e.g. A18">
+        </div>
+
+        <!-- Label -->
+        <div class="field-group">
+          <label for="new-label">Label <span class="field-hint">(use \n for line breaks)</span></label>
+          <input id="new-label" type="text" class="field-input" placeholder="Short node label">
+        </div>
+
+        <!-- Category -->
+        <div class="field-group">
+          <label for="new-cat">Category</label>
+          <select id="new-cat" class="field-input field-select">
+            <!-- Populated by creator.js -->
+          </select>
+        </div>
+
+        <!-- Description -->
+        <div class="field-group">
+          <label for="new-desc">Description</label>
+          <textarea id="new-desc" class="field-input field-textarea" rows="3"
+                    placeholder="Ethical justification, context…"></textarea>
+        </div>
+
+        <!-- Attacks -->
+        <div class="field-group">
+          <label>Attacks →
+            <span class="field-hint">(IDs this argument attacks)</span>
+          </label>
+          <div class="tag-row">
+            <input id="attacks-input" type="text" class="field-input tag-input"
+                   list="attacks-list" placeholder="ID then Enter">
+            <datalist id="attacks-list"></datalist>
+            <button id="btn-add-attack" class="tag-add-btn">+</button>
+          </div>
+          <div class="tags-container attack-tags" id="attacks-tags"></div>
+        </div>
+
+        <!-- Attacked by -->
+        <div class="field-group">
+          <label>← Attacked by
+            <span class="field-hint">(IDs that attack this argument)</span>
+          </label>
+          <div class="tag-row">
+            <input id="attackedby-input" type="text" class="field-input tag-input"
+                   list="attackedby-list" placeholder="ID then Enter">
+            <datalist id="attackedby-list"></datalist>
+            <button id="btn-add-attackedby" class="tag-add-btn def">+</button>
+          </div>
+          <div class="tags-container def-tags" id="attackedby-tags"></div>
+        </div>
+
+        <!-- Error message -->
+        <div class="form-error" id="form-error"></div>
+
+        <!-- Submit -->
+        <button id="btn-create" class="create-btn">Create argument</button>
+
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════
+         CENTRE — D3 graph canvas
+         ════════════════════════════════════════════════════ -->
+    <div id="graph-container">
+      <svg id="svg"></svg>
+      <div class="instructions">click = details · drag = move · scroll = zoom</div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════
+         RIGHT PANEL — Selected argument detail
+         ════════════════════════════════════════════════════ -->
+    <div class="sidebar sidebar-right">
+
+      <!-- Legend -->
+      <div class="legend">
+        <h2>Ethical dimensions</h2>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--env)"></div>Environmental ethics</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--eco)"></div>Economic value</div>
+        <div class="legend-attack">
+          <div class="arrow-line"></div>
+          <span>attacks</span>
+        </div>
+      </div>
+
+      <!-- Category Weights -->
+      <div class="weight-section">
+        <h2>Dimension importance</h2>
+        <div class="weights-container">
+          <div class="weight-item">
+            <div class="weight-label">
+              <span>Tilt towards</span>
+              <span class="weight-val" id="importance-label">Balanced</span>
+            </div>
+            <input
+              id="importance-range"
+              type="range"
+              min="0"
+              max="1"
+              step="0.01"
+              value="0.5"
+              class="weight-range"
+            >
+            <div class="weight-ends">
+              <span>Economic value</span>
+              <span>Environmental ethics</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Node detail -->
+      <div class="dimension-panel">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <h2>Score method</h2>
+          <select id="semantics-method" class="method-select">
+            <option value="h-categorizer">h-categorizer</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Global scores footer -->
+      <div class="score-section">
+        <h2>Scores by dimension (avg)</h2>
+        <div class="global-scores" id="global-scores"></div>
+        <div class="final-score-box">
+          <div class="final-score-label">Final Weighted Score</div>
+          <div id="final-score-val" class="final-score-val">0.00</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Load order: graph renderer → panel modules → entry point -->
+  <script src="semantics.js"></script>
+  <script src="graph.js"></script>
+  <script src="ui.js"></script>
+  <script src="creator.js"></script>
+  <script src="main.js"></script>
+
+</body>
+</html>
