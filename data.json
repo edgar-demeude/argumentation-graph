@@ -1,169 +1,292 @@
 {
   "colors": {
-    "env":  "#4caf78",
-    "eco":  "#da5d4d"
+    "action": "#9b8fd4",
+    "env":    "#4caf78",
+    "eco":    "#da5d4d"
   },
   "cats": {
-    "env":  "Environmental ethics",
-    "eco":  "Economic value"
+    "action": "Action",
+    "env":    "Environmental ethics",
+    "eco":    "Economic value"
   },
   "globalScores": [
-    { "label": "Env.",      "cat": "env",  "value": 0.0 },
-    { "label": "Economic",  "cat": "eco",  "value": 0.0 }
+    { "label": "Action",   "cat": "action", "value": 0.0 },
+    { "label": "Env.",     "cat": "env",    "value": 0.0 },
+    { "label": "Economic", "cat": "eco",    "value": 0.0 }
   ],
   "nodes": [
+
     {
       "id": "A1",
-      "label": "Pesticides\nmaximise\nyield",
-      "cat": "eco",
-      "score": 0.42,
-      "desc": "Utilitarian argument: increasing yield justifies the use of chemical inputs. Rooted in a short-term productive efficiency ethics.",
-      "attacks":    ["A17"],
-      "attackedBy": ["A2", "A3"]
+      "label": "Utiliser des\npesticides\nchimiques",
+      "cat": "action",
+      "score": 0.0,
+      "desc": "Épandre des insecticides et herbicides de synthèse pour protéger les cultures. Pratique dominante en agriculture conventionnelle, efficace à court terme mais controversée.",
+      "attacks":    [],
+      "attackedBy": ["A7", "A8"]
     },
     {
       "id": "A2",
-      "label": "Pesticides\ndestroy\nbiodiversity",
-      "cat": "env",
-      "score": 0.78,
-      "desc": "Empirical and ethical argument: pesticides reduce species diversity, irreversibly damaging the ecosystem. Intrinsic value of non-human life.",
-      "attacks":    ["A1"],
-      "attackedBy": ["A4"]
+      "label": "Introduire des\nauxiliaires\nbiologiques",
+      "cat": "action",
+      "score": 0.0,
+      "desc": "Lâcher coccinelles, chrysopes ou trichogrammes pour réguler les ravageurs sans intrants chimiques. Pilier de la lutte biologique intégrée.",
+      "attacks":    [],
+      "attackedBy": ["A16"]
     },
     {
       "id": "A3",
-      "label": "Biodiversity\nhas intrinsic\nvalue",
-      "cat": "env",
-      "score": 0.85,
-      "desc": "Fundamental ethical principle (deep ecology): species have value independent of their utility to humans. Basis of biocentric environmental ethics.",
-      "attacks":    ["A1", "A9"],
-      "attackedBy": []
+      "label": "Composter\nles déchets\norganiques",
+      "cat": "action",
+      "score": 0.0,
+      "desc": "Transformer épluchures, tonte et feuilles mortes en compost mûr pour amender le sol naturellement. Fermeture du cycle de la matière organique au jardin.",
+      "attacks":    [],
+      "attackedBy": ["A18"]
     },
     {
       "id": "A4",
-      "label": "Profitability\njustifies\nchemical inputs",
-      "cat": "eco",
-      "score": 0.28,
-      "desc": "Anthropocentric and economic argument: economic efficiency takes precedence over ecological considerations. A short-sighted view of value.",
-      "attacks":    ["A2", "A15"],
-      "attackedBy": ["A5", "A14", "A15"]
+      "label": "Arroser\nquotidiennement\nau tuyau",
+      "cat": "action",
+      "score": 0.0,
+      "desc": "Irrigation manuelle journalière sans mesure précise du volume apporté. Méthode répandue mais peu efficiente en termes de consommation d'eau.",
+      "attacks":    [],
+      "attackedBy": ["A22"]
     },
     {
       "id": "A5",
-      "label": "Long-term\nsoil health\ncomes first",
-      "cat": "env",
-      "score": 0.80,
-      "desc": "Sustainability argument: preserving soil structure and microbial life is a necessary condition for any future agriculture. Ethics of responsibility.",
-      "attacks":    ["A4", "A13"],
-      "attackedBy": []
+      "label": "Installer une\nirrigation\ngoutte-à-goutte",
+      "cat": "action",
+      "score": 0.0,
+      "desc": "Système de tuyaux perforés délivrant l'eau directement à la base des plants. Réduit les pertes par évaporation de 30 à 50 %.",
+      "attacks":    [],
+      "attackedBy": ["A25"]
     },
     {
       "id": "A6",
-      "label": "Composting\nfertilises\nnaturally",
-      "cat": "env",
-      "score": 0.76,
-      "desc": "Practical and ecological solution: compost maintains fertility without degrading the ecosystem, supported by soil science. Convergent argument between efficiency and ethics.",
-      "attacks":    ["A7"],
-      "attackedBy": ["A7"]
+      "label": "Planter des\nespèces invasives\nornementales",
+      "cat": "action",
+      "score": 0.0,
+      "desc": "Introduire renouée du Japon, buddleia ou herbe de la pampa pour leur valeur esthétique. Pratique courante en jardinerie malgré le risque écologique documenté.",
+      "attacks":    [],
+      "attackedBy": ["A27", "A30"]
     },
+
     {
       "id": "A7",
-      "label": "Eco-gardening\nis too\ndemanding",
-      "cat": "eco",
-      "score": 0.35,
-      "desc": "Practical objection: the time and skills required by ecological practices represent a real barrier for most amateur gardeners.",
-      "attacks":    ["A6"],
-      "attackedBy": ["A6"]
+      "label": "Détruit les\npollinisateurs\nessentiels",
+      "cat": "env",
+      "score": 0.0,
+      "desc": "Les néonicotinoïdes et pyréthrinoïdes provoquent désorientation et mort des abeilles, bourdons et syrphes, compromettant la pollinisation de 80 % des plantes à fleurs.",
+      "attacks":    ["A1"],
+      "attackedBy": ["A9", "A10"]
     },
     {
       "id": "A8",
-      "label": "Native plants\nsupport the\necosystem",
+      "label": "Contamine\nla nappe\nphréatique",
       "cat": "env",
-      "score": 0.82,
-      "desc": "Ecosystem argument: native plant species provide habitat and food for local fauna, reinforcing trophic networks. Functional and intrinsic value.",
-      "attacks":    ["A9"],
-      "attackedBy": []
+      "score": 0.0,
+      "desc": "Les résidus de glyphosate, chlorpyrifos et métolachlore s'infiltrent dans les sols et rejoignent les eaux souterraines, menaçant eau potable et écosystèmes aquatiques sur des décennies.",
+      "attacks":    ["A1"],
+      "attackedBy": ["A10"]
     },
     {
       "id": "A9",
-      "label": "Killing pests\nprotects\ncrops",
+      "label": "Rendements\nagricoles\nprotégés",
       "cat": "eco",
-      "score": 0.33,
-      "desc": "Instrumental justification: pest insects cause economic losses, legitimising their elimination. Ignores the moral value of invertebrates.",
-      "attacks":    ["A16"],
-      "attackedBy": ["A3", "A8", "A10", "A16"]
+      "score": 0.0,
+      "desc": "Sans pesticides, les pertes de récolte peuvent atteindre 20 à 40 % selon cultures et années. Argument central de l'agriculture conventionnelle pour maintenir la rentabilité.",
+      "attacks":    ["A7"],
+      "attackedBy": ["A11"]
     },
     {
       "id": "A10",
-      "label": "Insects have\nmoral\nvalue",
-      "cat": "env",
-      "score": 0.71,
-      "desc": "Ethics of care extended to invertebrates: even insects, capable of feeling, deserve moral consideration. Sentientist or biocentric approach.",
-      "attacks":    ["A9"],
-      "attackedBy": []
+      "label": "Doses\nhomologuées,\nrisque maîtrisé",
+      "cat": "eco",
+      "score": 0.0,
+      "desc": "Les autorités sanitaires (ANSES, EFSA) fixent LMR et DAR garantissant, selon l'industrie, un niveau de risque acceptable pour la faune non cible et les consommateurs.",
+      "attacks":    ["A7", "A8"],
+      "attackedBy": ["A12", "A13"]
     },
     {
       "id": "A11",
-      "label": "Intensive\nirrigation\nwastes water",
+      "label": "Résistances\ndes ravageurs\nà long terme",
       "cat": "env",
-      "score": 0.67,
-      "desc": "Empirical argument: excessive watering depletes groundwater and contributes to regional water stress, particularly in the context of climate change.",
-      "attacks":    [],
-      "attackedBy": ["A12", "A15", "A17"]
+      "score": 0.0,
+      "desc": "L'usage répété de mêmes molécules sélectionne des populations résistantes, obligeant à augmenter les doses ou changer de molécule dans une course aux armements sans fin.",
+      "attacks":    ["A9"],
+      "attackedBy": ["A14"]
     },
     {
       "id": "A12",
-      "label": "Rainwater\nharvesting is\naccessible",
+      "label": "LMR ignorent\nles effets\ncocktail",
       "cat": "env",
-      "score": 0.73,
-      "desc": "Pragmatic counter-measure: simple, low-cost solutions (tanks, mulching) make it possible to reconcile gardening with water resource conservation.",
-      "attacks":    ["A11"],
+      "score": 0.0,
+      "desc": "Les limites maximales de résidus sont établies molécule par molécule. Les effets synergiques de mélanges peuvent être nettement plus toxiques que chaque substance évaluée seule.",
+      "attacks":    ["A10"],
       "attackedBy": []
     },
     {
       "id": "A13",
-      "label": "Chemical\nfertilisers\nare effective",
-      "cat": "eco",
-      "score": 0.38,
-      "desc": "Immediate efficiency argument: synthetic fertilisers provide rapidly assimilable nutrients, optimising short-term growth.",
-      "attacks":    [],
-      "attackedBy": ["A5", "A14"]
+      "label": "Pollinisateurs\nsensibles même\nà faible dose",
+      "cat": "env",
+      "score": 0.0,
+      "desc": "Effets sublétaux documentés (désorientation, baisse de mémoire spatiale, réduction de ponte) chez les abeilles à des concentrations bien inférieures aux LMR officielles.",
+      "attacks":    ["A10"],
+      "attackedBy": ["A14"]
     },
     {
       "id": "A14",
-      "label": "Chemical\nfertilisers\ndegrade soil",
-      "cat": "env",
-      "score": 0.77,
-      "desc": "Empirical and ethical rebuttal: acidification, salinisation and destruction of microfauna are documented long-term effects of chemical fertilisers.",
-      "attacks":    ["A4", "A13"],
-      "attackedBy": []
+      "label": "Coût de la\ntransition\ntrop élevé",
+      "cat": "eco",
+      "score": 0.0,
+      "desc": "Passer aux pratiques alternatives nécessite formation, nouveaux équipements et acceptation d'une baisse transitoire de rendement. Frein majeur pour les exploitations endettées.",
+      "attacks":    ["A11", "A13", "A17"],
+      "attackedBy": ["A15"]
     },
     {
       "id": "A15",
-      "label": "Future generations\nhave a right to\nhealthy ecosystems",
+      "label": "Subventions\nagro-écologie\ndisponibles",
       "cat": "env",
-      "score": 0.88,
-      "desc": "Intergenerational justice (Rawls, Jonas): we have a moral obligation to pass on a viable environment. Principle of responsibility towards the future.",
-      "attacks":    ["A4", "A11"],
-      "attackedBy": ["A4"]
+      "score": 0.0,
+      "desc": "Le plan Ecophyto et les mesures agro-environnementales de la PAC offrent des aides directes pour compenser les surcoûts de la transition vers des pratiques sans pesticides.",
+      "attacks":    ["A14"],
+      "attackedBy": []
     },
     {
       "id": "A16",
-      "label": "Pollinators\nare ecologically\nindispensable",
-      "cat": "env",
-      "score": 0.90,
-      "desc": "Functional and ethical argument: bees and other pollinators ensure the reproduction of 80% of flowering plants. Their decline directly threatens food security.",
-      "attacks":    ["A9"],
-      "attackedBy": ["A9"]
+      "label": "Coût d'achat\net logistique\ncomplexe",
+      "cat": "eco",
+      "score": 0.0,
+      "desc": "L'achat de coccinelles, chrysopes et nématodes représente un investissement notable. La conservation et le lâcher au bon moment exigent expertise et équipements spécialisés.",
+      "attacks":    ["A2"],
+      "attackedBy": ["A17"]
     },
     {
       "id": "A17",
-      "label": "Preserving\nwater is a\nmoral duty",
+      "label": "Investissement\ndurable, zéro\nrésidu chimique",
       "cat": "env",
-      "score": 0.84,
-      "desc": "Water is a threatened global common good. Its preservation is a matter of global ethical responsibility — towards living and yet-to-be-born humans, and towards other species.",
-      "attacks":    ["A11"],
-      "attackedBy": ["A1"]
+      "score": 0.0,
+      "desc": "Les auxiliaires établissent des populations pérennes autorégulatrices. Sur 3 ans, le coût est inférieur aux traitements répétés, sans résidus sur les récoltes ni risque de résistance.",
+      "attacks":    ["A16"],
+      "attackedBy": ["A14"]
+    },
+    {
+      "id": "A18",
+      "label": "Processus lent,\nespace\nnécessaire",
+      "cat": "eco",
+      "score": 0.0,
+      "desc": "Le compostage demande 3 à 6 mois de maturation et occupe plusieurs m². Pour les petits jardins urbains ou les agriculteurs sous pression de temps, la contrainte est rédhibitoire.",
+      "attacks":    ["A3"],
+      "attackedBy": ["A19"]
+    },
+    {
+      "id": "A19",
+      "label": "Améliore\ndurablement\nla structure du sol",
+      "cat": "env",
+      "score": 0.0,
+      "desc": "Le compost augmente la CEC, favorise la vie microbienne et améliore la rétention hydrique. Ces bénéfices se cumulent sur plusieurs années, sans équivalent synthétique.",
+      "attacks":    ["A18"],
+      "attackedBy": ["A20"]
+    },
+    {
+      "id": "A20",
+      "label": "Engrais\nsynthétiques\nplus rapides",
+      "cat": "eco",
+      "score": 0.0,
+      "desc": "NPK solubles agissent dès la première semaine. Pour des cultures à cycle court ou des maraîchers en rotation rapide, la réponse immédiate est un avantage compétitif décisif.",
+      "attacks":    ["A19"],
+      "attackedBy": ["A21"]
+    },
+    {
+      "id": "A21",
+      "label": "Engrais\nsynthétiques\nappauvrissent\nles sols",
+      "cat": "env",
+      "score": 0.0,
+      "desc": "L'usage répété acidifie les sols, réduit la diversité microbienne et crée une dépendance aux intrants. À terme, les rendements plafonnent et la résilience du système s'effondre.",
+      "attacks":    ["A20"],
+      "attackedBy": []
+    },
+    {
+      "id": "A22",
+      "label": "Gaspillage d'une\nressource en\ntension globale",
+      "cat": "env",
+      "score": 0.0,
+      "desc": "L'arrosage non maîtrisé consomme 2 à 3 fois plus que nécessaire. L'agriculture représente 70 % des prélèvements mondiaux en eau douce, une ressource de plus en plus rare.",
+      "attacks":    ["A4"],
+      "attackedBy": ["A23"]
+    },
+    {
+      "id": "A23",
+      "label": "Eau encore\nabondante en\nzone tempérée",
+      "cat": "eco",
+      "score": 0.0,
+      "desc": "Dans les régions à pluviométrie régulière (> 700 mm/an), les nappes se rechargent naturellement. Le coût marginal de l'eau reste faible et ne justifie pas des investissements lourds.",
+      "attacks":    ["A22"],
+      "attackedBy": ["A24"]
+    },
+    {
+      "id": "A24",
+      "label": "Le changement\nclimatique aggrave\nle stress hydrique",
+      "cat": "env",
+      "score": 0.0,
+      "desc": "Les projections GIEC prévoient une baisse des précipitations estivales de 10 à 25 % d'ici 2050 en Europe. Les étiages s'intensifient, remettant en cause toute hypothèse d'abondance locale.",
+      "attacks":    ["A23", "A25"],
+      "attackedBy": []
+    },
+    {
+      "id": "A25",
+      "label": "Investissement\ninitial\ndissuasif",
+      "cat": "eco",
+      "score": 0.0,
+      "desc": "L'installation d'un réseau goutte-à-goutte coûte 300 à 1500 € selon la surface. Pour les petits jardins ou les propriétaires à budget limité, le retour sur investissement paraît incertain.",
+      "attacks":    ["A5"],
+      "attackedBy": ["A24", "A26"]
+    },
+    {
+      "id": "A26",
+      "label": "Économies d'eau\nréduisent les\ncharges à terme",
+      "cat": "env",
+      "score": 0.0,
+      "desc": "Le goutte-à-goutte réduit la consommation de 30 à 50 %. Avec la hausse du prix de l'eau et les restrictions estivales, l'amortissement est généralement atteint en 2 à 4 ans.",
+      "attacks":    ["A25"],
+      "attackedBy": []
+    },
+    {
+      "id": "A27",
+      "label": "Menace la\nbiodiversité\nnative",
+      "cat": "env",
+      "score": 0.0,
+      "desc": "Les invasives comme la renouée du Japon forment des peuplements mono-spécifiques qui éliminent la végétation locale, privant la faune indigène de ses ressources alimentaires et d'habitat.",
+      "attacks":    ["A6"],
+      "attackedBy": ["A28"]
+    },
+    {
+      "id": "A28",
+      "label": "Valeur\nornementale\net marché\nflorissant",
+      "cat": "eco",
+      "score": 0.0,
+      "desc": "Ces plantes représentent plusieurs milliards d'euros en Europe. Leur port spectaculaire, floraison abondante et rusticité en font des best-sellers en jardineries, soutenant un secteur employeur.",
+      "attacks":    ["A27", "A30"],
+      "attackedBy": ["A29"]
+    },
+    {
+      "id": "A29",
+      "label": "Services\nécosystémiques\nperdus non\ncompensables",
+      "cat": "env",
+      "score": 0.0,
+      "desc": "La valeur réelle des pollinisateurs, oiseaux granivores et champignons mycorhiziens éliminés par les invasives dépasse largement celle du marché ornemental, selon les études d'évaluation des services.",
+      "attacks":    ["A28"],
+      "attackedBy": []
+    },
+    {
+      "id": "A30",
+      "label": "Se propage\nhors du jardin\nsans contrôle",
+      "cat": "env",
+      "score": 0.0,
+      "desc": "Graines et rhizomes colonisent berges, forêts et zones humides voisines. La gestion curative coûte des millions aux collectivités annuellement et la renouée du Japon est quasi inéradicable.",
+      "attacks":    ["A6"],
+      "attackedBy": ["A28"]
     }
+
   ]
 }

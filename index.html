@@ -5,7 +5,18 @@
   <title>Argumentation Graph — Ecological Gardening Ethics</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Mono:wght@300;400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
   <link rel="stylesheet" href="styles.css">
+  <style>
+    .formula-display { display: flex; flex-direction: column; gap: 14px; }
+    .formula-block { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 8px; padding: 10px 12px; }
+    .formula-title { font-family: 'DM Sans', sans-serif; font-size: 10px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: #8a9e8e; margin-bottom: 8px; }
+    .formula-math { overflow-x: auto; text-align: center; }
+    .formula-math .katex { font-size: 0.95em; color: #d4e8d6; }
+    .formula-math .katex-display { margin: 4px 0; }
+    .formula-note { font-family: 'DM Sans', sans-serif; font-size: 11px; color: #7a8e7c; line-height: 1.5; margin-top: 6px; font-style: italic; white-space: pre-line; }
+    .formula-note--small { font-size: 10px; }
+  </style>
 </head>
 <body>
 
@@ -108,6 +119,7 @@
       <!-- Legend -->
       <div class="legend">
         <h2>Ethical dimensions</h2>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--action)"></div>Action</div>
         <div class="legend-item"><div class="legend-dot" style="background:var(--env)"></div>Environmental ethics</div>
         <div class="legend-item"><div class="legend-dot" style="background:var(--eco)"></div>Economic value</div>
         <div class="legend-attack">
@@ -142,29 +154,33 @@
         </div>
       </div>
 
-      <!-- Node detail -->
-      <div class="dimension-panel">
+      <!-- Score method + formula -->
+      <div class="detail-panel">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
           <h2>Score method</h2>
           <select id="semantics-method" class="method-select">
             <option value="h-categorizer">h-categorizer</option>
           </select>
         </div>
+        <div id="formula-display" class="formula-display"></div>
       </div>
 
       <!-- Global scores footer -->
       <div class="score-section">
         <h2>Scores by dimension (avg)</h2>
         <div class="global-scores" id="global-scores"></div>
+        
         <div class="final-score-box">
-          <div class="final-score-label">Final Weighted Score</div>
-          <div id="final-score-val" class="final-score-val">0.00</div>
+          <button id="start-simulation-btn" class="create-btn">
+            Start Simulation
+          </button>
         </div>
       </div>
 
     </div>
   </div>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
   <!-- Load order: graph renderer → panel modules → entry point -->
   <script src="semantics.js"></script>
   <script src="graph.js"></script>

@@ -19,11 +19,9 @@
   --accent: #5dba6f;
 
   /* Category colours — must mirror "colors" in data.json */
+  --action:  #da5d4d;
   --env:  #4caf78;
-  --eco:  #da5d4d;
-  --care: #5bafd6;
-  --just: #b07de8;
-  --prag: #dca450;
+  --eco: #dca450;
 
   /* Dynamic accent driven by creator.js (current selected category) */
   --creator-accent: #5dba6f;
@@ -131,7 +129,7 @@ svg {
 /* Shared section header style (used in both panels) */
 .panel-header,
 .legend,
-.dimension-panel,
+.detail-panel,
 .score-section {
   /* individual padding set below */
 }
@@ -492,7 +490,7 @@ h2 {
 }
 
 /* Detail panel */
-.dimension-panel {
+.detail-panel {
   flex: 1;
   padding: 18px;
   overflow-y: auto;

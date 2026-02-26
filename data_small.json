@@ -1,0 +1,82 @@
+{
+  "colors": {
+    "action": "#da5d4d",
+    "env":    "#4caf78",
+    "eco":    "#dca450"
+  },
+  "cats": {
+    "action": "Action",
+    "env":    "Environmental ethics",
+    "eco":    "Economic value"
+  },
+  "globalScores": [
+    { "label": "Action",    "cat": "action", "value": 0.0 },
+    { "label": "Env.",      "cat": "env",    "value": 0.0 },
+    { "label": "Economic",  "cat": "eco",    "value": 0.0 }
+  ],
+  "nodes": [
+    {
+      "id": "A1",
+      "label": "Utiliser\ndes pesticides",
+      "cat": "action",
+      "score": 0.0,
+      "desc": "Pratique agricole consistant à épandre des produits phytosanitaires chimiques pour protéger les cultures contre les ravageurs et mauvaises herbes.",
+      "attacks":    [],
+      "attackedBy": ["A2", "A3"]
+    },
+    {
+      "id": "A2",
+      "label": "Détruit la\nbiodiversité\nlocale",
+      "cat": "env",
+      "score": 0.0,
+      "desc": "Les pesticides réduisent significativement la diversité des insectes, oiseaux et micro-organismes du sol, fragmentant les écosystèmes locaux.",
+      "attacks":    ["A1"],
+      "attackedBy": ["A4"]
+    },
+    {
+      "id": "A3",
+      "label": "Risque prouvé\npour la santé\nhumaine",
+      "cat": "env",
+      "score": 0.0,
+      "desc": "Plusieurs études épidémiologiques établissent un lien entre exposition aux pesticides et pathologies neurologiques, cancers et perturbations endocriniennes.",
+      "attacks":    ["A1"],
+      "attackedBy": ["A5"]
+    },
+    {
+      "id": "A4",
+      "label": "Impact limité\nsi dosage\ncontrôlé",
+      "cat": "eco",
+      "score": 0.0,
+      "desc": "Avec les bonnes pratiques agronomiques (doses homologuées, périodes d'application adaptées), l'impact sur la biodiversité resterait marginal selon l'industrie.",
+      "attacks":    ["A2"],
+      "attackedBy": ["A6"]
+    },
+    {
+      "id": "A5",
+      "label": "Seuils\nréglementaires\ngarantissent\nla sécurité",
+      "cat": "eco",
+      "score": 0.0,
+      "desc": "Les autorités sanitaires fixent des LMR (limites maximales de résidus) censées protéger les consommateurs. Le cadre réglementaire est présenté comme suffisant.",
+      "attacks":    ["A3"],
+      "attackedBy": []
+    },
+    {
+      "id": "A6",
+      "label": "Alternatives\nbio plus\nefficaces\nà long terme",
+      "cat": "env",
+      "score": 0.0,
+      "desc": "La lutte biologique intégrée (auxiliaires, rotations, variétés résistantes) offre une protection durable sans effets secondaires, réfutant l'argument du dosage contrôlé.",
+      "attacks":    ["A4"],
+      "attackedBy": ["A7"]
+    },
+    {
+      "id": "A7",
+      "label": "Coût élevé\ndes méthodes\nalternatives",
+      "cat": "eco",
+      "score": 0.0,
+      "desc": "Le passage aux alternatives biologiques exige un investissement initial important (formation, équipements, transition) que les petites exploitations ne peuvent pas toujours assumer.",
+      "attacks":    ["A6"],
+      "attackedBy": []
+    }
+  ]
+}

@@ -16,11 +16,11 @@ const GRAPH_CONFIG = {
   idFontSize:       10,
   linkDistance:     145,
   linkStrength:     0.5,
-  chargeStrength:  -430,
-  collideRadius:    68,
+  chargeStrength:  -130,
+  collideRadius:    80,
   zoomMin:          0.3,
   zoomMax:          3.0,
-  curvature:        1.5,
+  curvature:        0.0,
 };
 
 function initGraph(data) {

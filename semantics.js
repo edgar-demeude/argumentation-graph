@@ -79,12 +79,12 @@ function calculateHCategorizer(nodes, categoryWeights = {}) {
 }
 
 /**
- * Aggregates scores by category and calculates an unweighted final average.
- * Category importance is already baked into individual scores via calculateSemantics.
- * @param {Array}  nodes   - Array of node objects with calculated scores.
+ * Aggregates scores by category and calculates a weighted final score.
+ * @param {Array}  nodes           - Array of node objects with calculated scores.
+ * @param {Object} categoryWeights - Map of cat -> weight for the final average.
  * @returns {Object} { categoryScores, finalScore }
  */
-function aggregateScores(nodes) {
+function aggregateScores(nodes, categoryWeights = {}) {
   const categoryData = {};
 
   nodes.forEach(n => {
@@ -94,15 +94,17 @@ function aggregateScores(nodes) {
   });
 
   const categoryScores = {};
-  let total = 0, count = 0;
+  let weightedSum = 0;
+  let totalWeight  = 0;
 
   for (const cat in categoryData) {
     const avg = categoryData[cat].sum / categoryData[cat].count;
     categoryScores[cat] = avg;
-    total += avg;
-    count += 1;
+
+    const w = categoryWeights[cat] !== undefined ? categoryWeights[cat] : 1.0;
+    weightedSum += avg * w;
+    totalWeight += w;
   }
 
-  const finalScore = count > 0 ? total / count : 0;
-  return { categoryScores, finalScore };
+  return categoryScores;
 }
