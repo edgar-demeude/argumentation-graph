@@ -5,80 +5,93 @@
     "eco":    "#dca450"
   },
   "cats": {
-    "action": "Fréquence d'arrosage",
-    "env":    "Croyances Environnementales",
-    "eco":    "Croyances Économiques"
+    "action": "Watering Frequency",
+    "env":    "Environmental Beliefs",
+    "eco":    "Economic Beliefs"
   },
   "globalScores": [
-    { "label": "Actions", "cat": "action", "value": 0.0 },
-    { "label": "Impact Env.", "cat": "env", "value": 0.0 },
-    { "label": "Impact Eco.", "cat": "eco", "value": 0.0 }
+    { "label": "Env. Impact", "cat": "env", "value": 0.0 },
+    { "label": "Eco. Impact", "cat": "eco", "value": 0.0 }
   ],
   "nodes": [
     {
       "id": "A1",
-      "label": "Arroser\n1x / jour",
+      "label": "Water\n1x / day",
       "cat": "action",
       "score": 0.0,
-      "desc": "Arrosage minimal. Idéal pour la nappe phréatique, mais risque de stress hydrique pour la plante.",
+      "desc": "Minimal watering. Good for the water table, but risks hydric stress for the plant.",
       "attacks": ["B_ECO_RENDEMENT"],
-      "attackedBy": []
+      "attackedBy": [],
+      "supports": [],
+      "supportedBy": []
     },
     {
       "id": "A2",
-      "label": "Arroser\n2x / jour",
+      "label": "Water\n2x / day",
       "cat": "action",
       "score": 0.0,
-      "desc": "Le standard horticole. Assure une croissance stable mais commence à peser sur la ressource en eau.",
+      "desc": "The horticultural standard. Ensures stable growth but starts to weigh on water resources.",
       "attacks": ["B_ENV_EAU"],
-      "attackedBy": []
+      "attackedBy": [],
+      "supports": ["B_ECO_RENDEMENT"],
+      "supportedBy": []
     },
     {
       "id": "A3",
-      "label": "Arroser\n3x / jour",
+      "label": "Water\n3x / day",
       "cat": "action",
       "score": 0.0,
-      "desc": "Arrosage intensif. On cherche le rendement maximal, au mépris de l'évaporation et du lessivage des sols.",
+      "desc": "Intensive watering. Aims for maximum yield at the expense of evaporation and soil leaching.",
       "attacks": ["B_ENV_EAU", "B_ENV_SOL", "B_ECO_FACTURE"],
-      "attackedBy": []
+      "attackedBy": [],
+      "supports": [],
+      "supportedBy": []
     },
 
     {
       "id": "B_ENV_EAU",
-      "label": "Économiser l'eau",
+      "label": "Save water",
       "cat": "env",
       "score": 0.0,
-      "desc": "La conviction que l'eau douce est rare. Plus on arrose (A2, A3), plus ce score s'effondre.",
+      "desc": "The conviction that fresh water is scarce. The more we water (A2, A3), the more this score collapses.",
       "attacks": ["B_ECO_RENDEMENT"],
-      "attackedBy": ["A2", "A3"]
+      "attackedBy": ["A2", "A3"],
+      "supports": ["B_ENV_SOL"],
+      "supportedBy": []
     },
     {
       "id": "B_ENV_SOL",
-      "label": "Préserver la\nqualité du sol",
+      "label": "Preserve\nsoil quality",
       "cat": "env",
       "score": 0.0,
-      "desc": "L'arrosage excessif (A3) lessive les nutriments et tasse la terre. Mauvais pour l'écosystème à long terme.",
+      "desc": "Excessive watering (A3) leaches nutrients and compacts the soil. Bad for the ecosystem long-term.",
       "attacks": [],
-      "attackedBy": ["A3"]
+      "attackedBy": ["A3"],
+      "supports": [],
+      "supportedBy": ["B_ENV_EAU"]
     },
 
     {
       "id": "B_ECO_RENDEMENT",
-      "label": "Maximiser la\nrécolte",
+      "label": "Maximise\nharvest",
       "cat": "eco",
       "score": 0.0,
-      "desc": "L'objectif est de produire le plus possible. Attaqué par le manque d'eau (A1) ou par une éthique de sobriété trop radicale (B_ENV_EAU).",
+      "desc": "The goal is to produce as much as possible. Attacked by water scarcity (A1) or a too-radical sobriety ethic (B_ENV_EAU). Supported by moderate watering (A2).",
       "attacks": ["B_ENV_EAU"],
-      "attackedBy": ["A1", "B_ENV_EAU"]
+      "attackedBy": ["A1", "B_ENV_EAU"],
+      "supports": [],
+      "supportedBy": ["A2"]
     },
     {
       "id": "B_ECO_FACTURE",
-      "label": "Minimiser les\ncharges",
+      "label": "Minimise\noperating costs",
       "cat": "eco",
       "score": 0.0,
-      "desc": "Le coût de l'eau est une dépense d'exploitation. L'arrosage intensif dégrade la rentabilité directe.",
+      "desc": "Water cost is an operating expense. Intensive watering directly reduces profitability.",
       "attacks": [],
-      "attackedBy": ["A2", "A3"]
+      "attackedBy": ["A2", "A3"],
+      "supports": [],
+      "supportedBy": []
     }
   ]
 }

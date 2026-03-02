@@ -17,6 +17,8 @@
   --text: #d1cfc0;
   --muted: #7a9e80;
   --accent: #5dba6f;
+  --attack: #e05555;
+  --support: #4caf78;
 
   /* Category colours — must mirror "colors" in data.json */
   /* --action:  #da5d4d; */
@@ -410,7 +412,7 @@ h2 {
   color: var(--muted);
 }
 
-.arrow-line {
+/* .arrow-line {
   width: 30px;
   height: 2px;
   background: var(--text);
@@ -424,7 +426,7 @@ h2 {
   top: -4px;
   border: 5px solid transparent;
   border-left: 7px solid var(--text);
-}
+} */
 
 /* Weight section */
 .weight-section {
@@ -744,19 +746,24 @@ h2 {
   text-anchor: middle;
 }
 
-.link {
+/* .link {
   stroke: var(--text);
   stroke-opacity: 0.55;
   stroke-width: 1.8;
   fill: none;
   marker-end: url(#arrow);
-}
+} */
 
-.link.highlighted {
+/* .link.highlighted {
   stroke-opacity: 1;
   stroke-width: 2.5;
-}
+} */
 
-.node.dimmed circle  { opacity: 0.25; }
+/* .node.dimmed circle  { opacity: 0.25; }
 .node.dimmed text    { opacity: 0.25; }
-.link.dimmed         { stroke-opacity: 0.08; }
+.link.dimmed         { stroke-opacity: 0.08; } */
+
+.link.link-inactive {
+  stroke: #555555 !important;
+  stroke-opacity: 0.4;
+}

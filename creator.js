@@ -8,25 +8,31 @@ function initCreatorPanel(gs) {
   const { data, nodes } = gs;
 
   /* ── State ────────────────────────────────────────────── */
-  let attacksTags    = [];
-  let attackedByTags = [];
-  let editingId      = null;   // null = create mode, string = edit mode
+  let attacksTags      = [];
+  let attackedByTags   = [];
+  let supportsTags     = [];
+  let supportedByTags  = [];
+  let editingId        = null;   // null = create mode, string = edit mode
 
   /* ── DOM references ───────────────────────────────────── */
-  const inputId          = document.getElementById('new-id');
-  const inputLabel       = document.getElementById('new-label');
-  const selectCat        = document.getElementById('new-cat');
-  const textaDesc        = document.getElementById('new-desc');
-  const attacksInput     = document.getElementById('attacks-input');
-  const attacksByInput   = document.getElementById('attackedby-input');
-  const attacksTags_el   = document.getElementById('attacks-tags');
-  const attacksByTags_el = document.getElementById('attackedby-tags');
-  const formError        = document.getElementById('form-error');
-  const btnRow           = document.getElementById('form-btn-row');
-  const btnCreate        = document.getElementById('btn-create');
-  const btnUpdate        = document.getElementById('btn-update');
-  const btnDelete        = document.getElementById('btn-delete');
-  const panelTitle       = document.querySelector('.sidebar-left .panel-header h2');
+  const inputId            = document.getElementById('new-id');
+  const inputLabel         = document.getElementById('new-label');
+  const selectCat          = document.getElementById('new-cat');
+  const textaDesc          = document.getElementById('new-desc');
+  const attacksInput       = document.getElementById('attacks-input');
+  const attacksByInput     = document.getElementById('attackedby-input');
+  const supportsInput      = document.getElementById('supports-input');
+  const supportedByInput   = document.getElementById('supportedby-input');
+  const attacksTags_el     = document.getElementById('attacks-tags');
+  const attacksByTags_el   = document.getElementById('attackedby-tags');
+  const supportsTags_el    = document.getElementById('supports-tags');
+  const supportedByTags_el = document.getElementById('supportedby-tags');
+  const formError          = document.getElementById('form-error');
+  const btnRow             = document.getElementById('form-btn-row');
+  const btnCreate          = document.getElementById('btn-create');
+  const btnUpdate          = document.getElementById('btn-update');
+  const btnDelete          = document.getElementById('btn-delete');
+  const panelTitle         = document.querySelector('.sidebar-left .panel-header h2');
 
   /* ── Populate category dropdown ───────────────────────── */
   Object.entries(data.cats).forEach(([key, label]) => {
@@ -47,7 +53,7 @@ function initCreatorPanel(gs) {
 
   /* ── Datalists ────────────────────────────────────────── */
   function buildDatalist() {
-    ['attacks-list', 'attackedby-list'].forEach(listId => {
+    ['attacks-list', 'attackedby-list', 'supports-list', 'supportedby-list'].forEach(listId => {
       const dl = document.getElementById(listId);
       dl.innerHTML = '';
       nodes.forEach(n => {
@@ -70,16 +76,20 @@ function initCreatorPanel(gs) {
     container.querySelectorAll('.tag-remove').forEach(btn => {
       btn.addEventListener('click', () => {
         const id = btn.dataset.id;
-        if (container === attacksTags_el)  attacksTags    = attacksTags.filter(x => x !== id);
-        else                               attackedByTags = attackedByTags.filter(x => x !== id);
+        if (container === attacksTags_el)     attacksTags     = attacksTags.filter(x => x !== id);
+        else if (container === attacksByTags_el)  attackedByTags  = attackedByTags.filter(x => x !== id);
+        else if (container === supportsTags_el)   supportsTags    = supportsTags.filter(x => x !== id);
+        else if (container === supportedByTags_el) supportedByTags = supportedByTags.filter(x => x !== id);
         renderAllTags();
       });
     });
   }
 
   function renderAllTags() {
-    renderTags(attacksTags,    attacksTags_el,   '#e07777');
-    renderTags(attackedByTags, attacksByTags_el, '#5dba6f');
+    renderTags(attacksTags,     attacksTags_el,     '#e07777');
+    renderTags(attackedByTags,  attacksByTags_el,   '#e0a070');
+    renderTags(supportsTags,    supportsTags_el,    '#4caf78');
+    renderTags(supportedByTags, supportedByTags_el, '#70c090');
   }
 
   function addTag(inputEl, arr) {
@@ -106,11 +116,13 @@ function initCreatorPanel(gs) {
 
   /* ── Reset form ───────────────────────────────────────── */
   function resetForm() {
-    attacksTags    = [];
-    attackedByTags = [];
+    attacksTags     = [];
+    attackedByTags  = [];
+    supportsTags    = [];
+    supportedByTags = [];
     renderAllTags();
-    inputLabel.value  = '';
-    textaDesc.value   = '';
+    inputLabel.value      = '';
+    textaDesc.value       = '';
     formError.textContent = '';
     buildDatalist();
     inputId.value = nextId();
@@ -125,8 +137,10 @@ function initCreatorPanel(gs) {
     inputLabel.value = node.label.replace(/\n/g, '\\n');
     selectCat.value  = node.cat;
     textaDesc.value  = node.desc || '';
-    attacksTags      = [...node.attacks];
-    attackedByTags   = [...node.attackedBy];
+    attacksTags      = [...(node.attacks     || [])];
+    attackedByTags   = [...(node.attackedBy  || [])];
+    supportsTags     = [...(node.supports    || [])];
+    supportedByTags  = [...(node.supportedBy || [])];
     formError.textContent = '';
     renderAllTags();
     setEditMode(node.id);
@@ -146,11 +160,13 @@ function initCreatorPanel(gs) {
     formError.textContent = '';
     return {
       id,
-      label:      label.replace(/\\n/g, '\n'),
+      label:       label.replace(/\\n/g, '\n'),
       cat,
-      desc:       desc || '',
-      attacks:    [...attacksTags],
-      attackedBy: [...attackedByTags],
+      desc:        desc || '',
+      attacks:     [...attacksTags],
+      attackedBy:  [...attackedByTags],
+      supports:    [...supportsTags],
+      supportedBy: [...supportedByTags],
     };
   }
 
@@ -183,10 +199,9 @@ function initCreatorPanel(gs) {
     if (!nodeData) return;
     if (!editingId) return;
 
-    // updateNode: rebuilds links, redraws, recomputes
     gs.updateNode(editingId, nodeData);
     if (gs.recalculate) gs.recalculate();
-    if (gs.deselect)    gs.deselect();   // clears highlight + calls resetForm via gs.resetCreatorForm
+    if (gs.deselect)    gs.deselect();
 
     btnUpdate.textContent      = '✓ Updated!';
     btnUpdate.style.background = data.colors[nodeData.cat] + '33';
@@ -207,12 +222,10 @@ function initCreatorPanel(gs) {
     if (!editingId) return;
 
     if (btnDelete.dataset.confirm === 'true') {
-      // Confirmed — delete
       gs.removeNode(editingId);
       if (gs.recalculate) gs.recalculate();
-      if (gs.deselect)    gs.deselect();  // resets form too
+      if (gs.deselect)    gs.deselect();
     } else {
-      // First click — ask for confirmation
       btnDelete.textContent     = '⚠ Confirm?';
       btnDelete.dataset.confirm = 'true';
       btnDelete.style.background = '#c0392b44';
@@ -233,4 +246,13 @@ function initCreatorPanel(gs) {
   });
   document.getElementById('btn-add-attackedby').addEventListener('click', () => addTag(attacksByInput, attackedByTags));
 
+  supportsInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); addTag(supportsInput, supportsTags); }
+  });
+  document.getElementById('btn-add-support').addEventListener('click', () => addTag(supportsInput, supportsTags));
+
+  supportedByInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); addTag(supportedByInput, supportedByTags); }
+  });
+  document.getElementById('btn-add-supportedby').addEventListener('click', () => addTag(supportedByInput, supportedByTags));
 }

@@ -10,9 +10,6 @@ function initDetailPanel(gs) {
   // Slider value v ∈ [0,1]:  0 = full eco,  0.5 = balanced,  1 = full env
   let sliderV = 0.5;
 
-  // Category weights used in TWO places:
-  //   (A) semantics: scales attacker contribution  →  w_eco = 2(1−v),  w_env = 2v,  others = 1
-  //   (B) aggregation: weights the final average   →  same mapping
   const categoryWeights = {};
   Object.keys(data.cats).forEach(cat => { categoryWeights[cat] = 1.0; });
 
@@ -25,17 +22,17 @@ function initDetailPanel(gs) {
   }
 
   function recalculate() {
-    // 1. Weighted h-categorizer scores
+    // 1. Weighted h-categorizer scores (inactive nodes excluded)
     const nodeScores = calculateSemantics(gs.nodes, 'h-categorizer', categoryWeights);
 
     // 2. Push scores onto node objects
     gs.nodes.forEach(n => { n.score = nodeScores[n.id] || 0; });
 
-    // 3. Refresh graph visuals (scores + colors/labels for any edited nodes)
+    // 3. Refresh graph visuals
     gs.updateNodeScores();
     if (gs.updateNodeVisuals) gs.updateNodeVisuals();
 
-    // 4. Weighted final average (same weights as semantics)
+    // 4. Aggregate — only value belief categories (not 'action')
     const result = aggregateScores(gs.nodes, categoryWeights);
 
     // 5. UI
@@ -44,19 +41,26 @@ function initDetailPanel(gs) {
 
   gs.recalculate = recalculate;
 
-  /* ── Global scores footer ─────────────────────────────── */
+  // Wire up inactive toggle to trigger recalculate
+  if (gs.setOnInactiveToggle) {
+    gs.setOnInactiveToggle(() => recalculate());
+  }
+
+  /* ── Global scores footer — value beliefs only ────────── */
   function renderGlobalScores(categoryScores) {
     const el = document.getElementById('global-scores');
-    el.innerHTML = Object.entries(data.cats).map(([cat, label]) => {
-      const val = categoryScores[cat] || 0;
-      if (cat === 'action') return '';
-      return `
-        <div class="gscore">
-          <div class="gscore-label">${label}</div>
-          <div class="gscore-val" style="color:${data.colors[cat]}">${val.toFixed(2)}</div>
-        </div>
-      `;
-    }).join('');
+    // Show only non-action categories (the "value belief" dimensions)
+    el.innerHTML = Object.entries(data.cats)
+      .filter(([cat]) => cat !== 'action')
+      .map(([cat, label]) => {
+        const val = categoryScores[cat] || 0;
+        return `
+          <div class="gscore">
+            <div class="gscore-label">${label}</div>
+            <div class="gscore-val" style="color:${data.colors[cat]}">${val.toFixed(2)}</div>
+          </div>
+        `;
+      }).join('');
   }
 
   /* ── Importance slider ────────────────────────────────── */
@@ -68,7 +72,6 @@ function initDetailPanel(gs) {
     const update = () => {
       sliderV = parseFloat(range.value);
 
-      // Percentage display
       const envPct = Math.round(sliderV * 100);
       const ecoPct = 100 - envPct;
       if (Math.abs(sliderV - 0.5) < 0.005) {
@@ -95,7 +98,6 @@ function initDetailPanel(gs) {
 
     el.innerHTML = '';
 
-    // ── Helper ───────────────────────────────────────────
     function addBlock(title, lines) {
       const block = document.createElement('div');
       block.className = 'formula-block';
@@ -109,7 +111,6 @@ function initDetailPanel(gs) {
 
       lines.forEach(({ tex, note, isSmall }) => {
         if (note) {
-          // Plain-text annotation row
           const row = document.createElement('div');
           row.className = 'formula-note' + (isSmall ? ' formula-note--small' : '');
           row.textContent = note;
@@ -126,25 +127,20 @@ function initDetailPanel(gs) {
       el.appendChild(block);
     }
 
-
-    // ── Block 1 : h-categorizer ──────────────────────────
-    addBlock('Node score — weighted h-categorizer', [
-      { tex: String.raw`\sigma(a) \;=\; \frac{1}{\,1 + \displaystyle\sum_{b\,\in\,Att(a)} \omega_{c(b)} \cdot \sigma(b)\,}` },
-      { note: 'An attacker b with low dimension weight ω has less power to reduce σ(a). Solved iteratively until convergence.' },
+    // ── Block 1: h-categorizer with support ─────────────
+    addBlock('Node score — extended h-categorizer', [
+      { tex: String.raw`\sigma(a) = \frac{1 + \displaystyle\sum_{b\in Sup(a)}\omega_{c(b)}\sigma(b)}{1 + \displaystyle\sum_{b\in Att(a)}\omega_{c(b)}\sigma(b) + \displaystyle\sum_{b\in Sup(a)}\omega_{c(b)}\sigma(b)}` },
+      { note: 'Supporters raise σ(a) toward 1; attackers lower it toward 0. Solved iteratively to convergence.' },
     ]);
 
-    // ── Block 2 : Notation ───────────────────────────────
+    // ── Block 2: Notation ────────────────────────────────
     addBlock('Notation', [
-      { tex: String.raw`a, b \in \mathcal{A}` },
-      { note: 'arguments in the graph' },
-      { tex: String.raw`Att(a)` },
-      { note: 'set of arguments that attack a' },
-      { tex: String.raw`c(a) \in \mathcal{C}` },
-      { note: 'ethical dimension (category) of a' },
-      { tex: String.raw`\sigma(a) \in [0, 1]` },
-      { note: 'gradual acceptability score of a' },
-      { tex: String.raw`\omega_c \in [0, 1]` },
+      { tex: String.raw`Att(a),\; Sup(a)` },
+      { note: 'sets of attackers / supporters of a' },
+      { tex: String.raw`\omega_c \in [0,2]` },
       { note: 'importance weight of dimension c' },
+      { tex: String.raw`\sigma(a) \in (0, 1)` },
+      { note: 'gradual acceptability score of a' },
     ]);
   }
 
@@ -160,7 +156,13 @@ function initDetailPanel(gs) {
 
     if (gs.fillCreatorForm) gs.fillCreatorForm(d);
 
-    const related = new Set([d.id, ...d.attacks, ...d.attackedBy]);
+    const related = new Set([
+      d.id,
+      ...(d.attacks     || []),
+      ...(d.attackedBy  || []),
+      ...(d.supports    || []),
+      ...(d.supportedBy || []),
+    ]);
     nodeSel.classed('dimmed',      n => !related.has(n.id));
     linkSel.classed('dimmed',      l => !(l.source.id === d.id || l.target.id === d.id));
     linkSel.classed('highlighted', l =>   l.source.id === d.id || l.target.id === d.id);
@@ -181,7 +183,6 @@ function initDetailPanel(gs) {
   initImportanceSlider();
   recalculate();
 
-  // Render formula (KaTeX may load async)
   if (typeof katex !== 'undefined') {
     renderFormula();
   } else {

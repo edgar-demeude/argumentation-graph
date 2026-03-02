@@ -20,23 +20,31 @@ const GRAPH_CONFIG = {
   collideRadius:    68,
   zoomMin:          0.3,
   zoomMax:          3.0,
-  curvature:        1.5,
+  curvature:        0,
 };
 
 function initGraph(data) {
 
   /* ── Working data arrays ──────────────────────────────── */
-  // Deep-copy so mutations don't touch the source JSON object
-  const nodes = data.nodes.map(n => ({ ...n,
-    attacks:    [...n.attacks],
-    attackedBy: [...n.attackedBy],
+  const nodes = data.nodes.map(n => ({
+    ...n,
+    attacks:     [...(n.attacks    || [])],
+    attackedBy:  [...(n.attackedBy || [])],
+    supports:    [...(n.supports    || [])],
+    supportedBy: [...(n.supportedBy || [])],
+    inactive: (n.cat !== 'action') ? !!n.inactive : true,  // only action nodes are inactive
   }));
 
-  // Derive links from nodes[].attacks
+  // Derive links from nodes[].attacks and nodes[].supports
+  // Each link has a `type` field: 'attack' | 'support'
   const links = [];
+
   nodes.forEach(n => {
     n.attacks.forEach(tgtId => {
-      links.push({ source: n.id, target: tgtId });
+      links.push({ source: n.id, target: tgtId, type: 'attack' });
+    });
+    n.supports.forEach(tgtId => {
+      links.push({ source: n.id, target: tgtId, type: 'support' });
     });
   });
 
@@ -76,18 +84,51 @@ function initGraph(data) {
 
   /* ── Arrowhead markers ────────────────────────────────── */
   const defs = svgEl.append('defs');
-  [{ id: 'arrow', color: '#e05555' }, { id: 'arrow-hi', color: '#ff6b6b' }]
-    .forEach(({ id, color }) => {
-      defs.append('marker')
-        .attr('id',           id)
-        .attr('viewBox',      '0 -5 10 10')
-        .attr('refX',         GRAPH_CONFIG.nodeRadius - 2)
-        .attr('refY',         0)
-        .attr('markerWidth',  6)
-        .attr('markerHeight', 6)
-        .attr('orient',       'auto')
-        .append('path').attr('d', 'M0,-5L10,0L0,5').attr('fill', color);
-    });
+
+  // Attack arrows — red
+  [
+    { id: 'arrow-attack',    color: '#e05555' },
+    { id: 'arrow-attack-hi', color: '#ff6b6b' },
+  ].forEach(({ id, color }) => {
+    defs.append('marker')
+      .attr('id',           id)
+      .attr('viewBox',      '0 -5 12 10')
+      .attr('refX',         GRAPH_CONFIG.nodeRadius + 10)  // tip (x=10) lands at circle edge
+      .attr('refY',         0)
+      .attr('markerUnits',  'userSpaceOnUse')
+      .attr('markerWidth',  12)
+      .attr('markerHeight', 10)
+      .attr('orient',       'auto')
+      .append('path').attr('d', 'M0,-4L10,0L0,4').attr('fill', color);
+  });
+
+  // Support arrows — green
+  [
+    { id: 'arrow-support',    color: '#4caf78' },
+    { id: 'arrow-support-hi', color: '#6ee89a' },
+  ].forEach(({ id, color }) => {
+    defs.append('marker')
+      .attr('id',           id)
+      .attr('viewBox',      '0 -5 12 10')
+      .attr('refX',         GRAPH_CONFIG.nodeRadius + 10)  // tip (x=10) lands at circle edge
+      .attr('refY',         0)
+      .attr('markerUnits',  'userSpaceOnUse')
+      .attr('markerWidth',  12)
+      .attr('markerHeight', 10)
+      .attr('orient',       'auto')
+      .append('path').attr('d', 'M0,-4L10,0L0,4').attr('fill', color);
+  });
+
+  defs.append('marker')
+    .attr('id',           'arrow-inactive')
+    .attr('viewBox',      '0 -5 12 10')
+    .attr('refX',         GRAPH_CONFIG.nodeRadius + 10)
+    .attr('refY',         0)
+    .attr('markerUnits',  'userSpaceOnUse')
+    .attr('markerWidth',  12)
+    .attr('markerHeight', 10)
+    .attr('orient',       'auto')
+    .append('path').attr('d', 'M0,-4L10,0L0,4').attr('fill', '#555555');
 
   /* ── Groups (links drawn under nodes) ────────────────── */
   const linksGroup = g.append('g').attr('class', 'links-group');
@@ -169,7 +210,6 @@ function initGraph(data) {
   }
 
   /* ── Core render / update function ───────────────────── */
-  // Called on initial render and after every mutation.
   let linkSel, nodeSel;
 
   function updateGraph() {
@@ -179,13 +219,22 @@ function initGraph(data) {
       .data(links, l => {
         const s = typeof l.source === 'object' ? l.source.id : l.source;
         const t = typeof l.target === 'object' ? l.target.id : l.target;
-        return `${s}->${t}`;
+        return `${l.type}:${s}->${t}`;
       })
       .join(
-        enter  => enter.append('path').attr('class', 'link').attr('marker-end', 'url(#arrow)'),
+        enter => enter.append('path')
+          .attr('class', l => `link link-${l.type}`)
+          .attr('marker-end', l => l.type === 'support' ? 'url(#arrow-support)' : 'url(#arrow-attack)'),
         update => update,
         exit   => exit.remove()
       );
+
+    linkSel
+      .classed('link-inactive', l => l.source.inactive)
+      .attr('marker-end', l => {
+        if (l.source.inactive) return 'url(#arrow-inactive)';
+        return l.type === 'support' ? 'url(#arrow-support)' : 'url(#arrow-attack)';
+      });
 
     // ── Nodes ──────────────────────────────────────────── //
     nodeSel = nodesGroup
@@ -196,7 +245,20 @@ function initGraph(data) {
           const grp = enter.append('g').attr('class', 'node');
           appendNodeVisuals(grp);
           grp.call(drag);
+
+          // Single click — select
           grp.on('click', (e, d) => { e.stopPropagation(); onNodeClick(d); });
+
+          // Right-click — toggle inactive (action nodes only)
+          grp.on('contextmenu', (e, d) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (d.cat !== 'action') return;
+            d.inactive = !d.inactive;
+            updateInactiveVisuals();
+            if (onInactiveToggle) onInactiveToggle();
+          });
+
           return grp;
         },
         update => update,
@@ -212,14 +274,14 @@ function initGraph(data) {
   /* ── updateNodeScores: update score rings and text ───── */
   function updateNodeScores() {
     if (!nodeSel) return;
-    
+
     nodeSel.selectAll('.score-ring')
       .transition().duration(500)
       .attr('stroke-dasharray', d => {
         const circ = 2 * Math.PI * GRAPH_CONFIG.nodeRadius;
         return `${(d.score || 0) * circ} ${circ}`;
       });
-      
+
     nodeSel.selectAll('.node-score')
       .text(d => (d.score || 0).toFixed(2));
   }
@@ -228,25 +290,20 @@ function initGraph(data) {
   function updateNodeVisuals() {
     if (!nodeSel) return;
 
-    // Background fill + border color
     nodeSel.selectAll('.node-bg')
       .attr('fill',   d => data.colors[d.cat] + '22')
       .attr('stroke', d => data.colors[d.cat]);
 
-    // Score ring color
     nodeSel.selectAll('.score-ring')
       .attr('stroke', d => data.colors[d.cat]);
 
-    // Score text color
     nodeSel.selectAll('.node-score')
       .attr('fill', d => data.colors[d.cat]);
 
-    // ID badge color + text
     nodeSel.selectAll('.node-id')
       .attr('fill', d => data.colors[d.cat])
       .text(d => d.id);
 
-    // Label lines — remove old, rebuild
     nodeSel.each(function(d) {
       const grp = d3.select(this);
       grp.selectAll('.node-label').remove();
@@ -254,12 +311,45 @@ function initGraph(data) {
       lines.forEach((line, i) => {
         grp.append('text')
           .attr('class',     'node-label')
-          .attr('y',         (i - (lines.length - 1) / 2) * 13)
           .attr('font-size', GRAPH_CONFIG.labelFontSize + 'px')
+          .attr('y',         (i - (lines.length - 1) / 2) * 13)
           .text(line);
       });
     });
+
+    updateInactiveVisuals();
   }
+
+  /* ── updateInactiveVisuals: apply/remove gray-out for inactive actions */
+  function updateInactiveVisuals() {
+    if (!nodeSel) return;
+    nodeSel.classed('node-inactive', d => !!d.inactive);
+
+    nodeSel.selectAll('.node-bg')
+      .attr('fill',   d => d.inactive ? '#33333322' : data.colors[d.cat] + '22')
+      .attr('stroke', d => d.inactive ? '#555555'   : data.colors[d.cat]);
+
+    nodeSel.selectAll('.score-ring')
+      .attr('stroke', d => d.inactive ? '#555555' : data.colors[d.cat]);
+
+    nodeSel.selectAll('.node-score')
+      .attr('fill', d => d.inactive ? '#555555' : data.colors[d.cat]);
+
+    nodeSel.selectAll('.node-id')
+      .attr('fill', d => d.inactive ? '#555555' : data.colors[d.cat]);
+
+    if (linkSel) {
+      linkSel
+        .classed('link-inactive', l => l.source.inactive)
+        .attr('marker-end', l => {
+          if (l.source.inactive) return 'url(#arrow-inactive)';
+          return l.type === 'support' ? 'url(#arrow-support)' : 'url(#arrow-attack)';
+        });
+    }
+  }
+
+  /* ── Callback slot for inactive toggle (set by ui.js) ── */
+  let onInactiveToggle = null;
 
   /* ── Tick ─────────────────────────────────────────────── */
   sim.on('tick', () => {
@@ -284,37 +374,58 @@ function initGraph(data) {
     sim.alpha(0.1).restart();
   });
 
+  /* ── Helper: rebuild all links for a given node ──────── */
+  function rebuildLinksForNode(nodeId) {
+    // Remove all existing links for this node
+    for (let i = links.length - 1; i >= 0; i--) {
+      const s = typeof links[i].source === 'object' ? links[i].source.id : links[i].source;
+      const t = typeof links[i].target === 'object' ? links[i].target.id : links[i].target;
+      if (s === nodeId || t === nodeId) links.splice(i, 1);
+    }
+  }
+
+  function linkExists(s, t, type) {
+    return links.some(l => {
+      const ls = typeof l.source === 'object' ? l.source.id : l.source;
+      const lt = typeof l.target === 'object' ? l.target.id : l.target;
+      return ls === s && lt === t && l.type === type;
+    });
+  }
+
   /* ── addNode: public API ──────────────────────────────── */
   function addNode(nodeObj) {
-    // Ensure arrays exist
-    nodeObj.attacks    = nodeObj.attacks    || [];
-    nodeObj.attackedBy = nodeObj.attackedBy || [];
+    nodeObj.attacks     = nodeObj.attacks     || [];
+    nodeObj.attackedBy  = nodeObj.attackedBy  || [];
+    nodeObj.supports    = nodeObj.supports    || [];
+    nodeObj.supportedBy = nodeObj.supportedBy || [];
+    nodeObj.inactive    = false;
 
-    // Add node to working array
     nodes.push(nodeObj);
 
-    // Add outgoing attack links (this node → targets)
     nodeObj.attacks.forEach(tgtId => {
-      links.push({ source: nodeObj.id, target: tgtId });
-      // Update target's attackedBy
+      links.push({ source: nodeObj.id, target: tgtId, type: 'attack' });
       const tgt = nodes.find(n => n.id === tgtId);
       if (tgt && !tgt.attackedBy.includes(nodeObj.id)) tgt.attackedBy.push(nodeObj.id);
     });
 
-    // Add incoming attack links (sources → this node)
     nodeObj.attackedBy.forEach(srcId => {
-      // Only add link if not already added via attacks
-      const alreadyExists = links.some(l => {
-        const s = typeof l.source === 'object' ? l.source.id : l.source;
-        const t = typeof l.target === 'object' ? l.target.id : l.target;
-        return s === srcId && t === nodeObj.id;
-      });
-      if (!alreadyExists) {
-        links.push({ source: srcId, target: nodeObj.id });
-      }
-      // Update source's attacks
+      if (!linkExists(srcId, nodeObj.id, 'attack'))
+        links.push({ source: srcId, target: nodeObj.id, type: 'attack' });
       const src = nodes.find(n => n.id === srcId);
       if (src && !src.attacks.includes(nodeObj.id)) src.attacks.push(nodeObj.id);
+    });
+
+    nodeObj.supports.forEach(tgtId => {
+      links.push({ source: nodeObj.id, target: tgtId, type: 'support' });
+      const tgt = nodes.find(n => n.id === tgtId);
+      if (tgt && !tgt.supportedBy.includes(nodeObj.id)) tgt.supportedBy.push(nodeObj.id);
+    });
+
+    nodeObj.supportedBy.forEach(srcId => {
+      if (!linkExists(srcId, nodeObj.id, 'support'))
+        links.push({ source: srcId, target: nodeObj.id, type: 'support' });
+      const src = nodes.find(n => n.id === srcId);
+      if (src && !src.supports.includes(nodeObj.id)) src.supports.push(nodeObj.id);
     });
 
     updateGraph();
@@ -325,40 +436,51 @@ function initGraph(data) {
     const node = nodes.find(n => n.id === id);
     if (!node) return;
 
-    // 1. Remove all existing links that involve this node
-    for (let i = links.length - 1; i >= 0; i--) {
-      const s = typeof links[i].source === 'object' ? links[i].source.id : links[i].source;
-      const t = typeof links[i].target === 'object' ? links[i].target.id : links[i].target;
-      if (s === id || t === id) links.splice(i, 1);
-    }
+    // 1. Remove all existing links for this node
+    rebuildLinksForNode(id);
 
     // 2. Clean up stale references in other nodes
     nodes.forEach(n => {
       if (n.id === id) return;
-      n.attacks    = n.attacks.filter(x => x !== id);
-      n.attackedBy = n.attackedBy.filter(x => x !== id);
+      n.attacks     = n.attacks.filter(x => x !== id);
+      n.attackedBy  = n.attackedBy.filter(x => x !== id);
+      n.supports    = n.supports.filter(x => x !== id);
+      n.supportedBy = n.supportedBy.filter(x => x !== id);
     });
 
-    // 3. Apply new data to the node object
-    Object.assign(node, newData);
+    // 3. Apply new data
+    Object.assign(node, {
+      ...newData,
+      supports:    newData.supports    || [],
+      supportedBy: newData.supportedBy || [],
+    });
 
-    // 4. Re-add outgoing links (this node attacks →)
+    // 4. Re-add attack links
     node.attacks.forEach(tgtId => {
-      links.push({ source: node.id, target: tgtId });
+      links.push({ source: node.id, target: tgtId, type: 'attack' });
       const tgt = nodes.find(n => n.id === tgtId);
       if (tgt && !tgt.attackedBy.includes(node.id)) tgt.attackedBy.push(node.id);
     });
 
-    // 5. Re-add incoming links (← attacked by)
     node.attackedBy.forEach(srcId => {
-      const alreadyExists = links.some(l => {
-        const s = typeof l.source === 'object' ? l.source.id : l.source;
-        const t = typeof l.target === 'object' ? l.target.id : l.target;
-        return s === srcId && t === node.id;
-      });
-      if (!alreadyExists) links.push({ source: srcId, target: node.id });
+      if (!linkExists(srcId, node.id, 'attack'))
+        links.push({ source: srcId, target: node.id, type: 'attack' });
       const src = nodes.find(n => n.id === srcId);
       if (src && !src.attacks.includes(node.id)) src.attacks.push(node.id);
+    });
+
+    // 5. Re-add support links
+    node.supports.forEach(tgtId => {
+      links.push({ source: node.id, target: tgtId, type: 'support' });
+      const tgt = nodes.find(n => n.id === tgtId);
+      if (tgt && !tgt.supportedBy.includes(node.id)) tgt.supportedBy.push(node.id);
+    });
+
+    node.supportedBy.forEach(srcId => {
+      if (!linkExists(srcId, node.id, 'support'))
+        links.push({ source: srcId, target: node.id, type: 'support' });
+      const src = nodes.find(n => n.id === srcId);
+      if (src && !src.supports.includes(node.id)) src.supports.push(node.id);
     });
 
     updateGraph();
@@ -367,20 +489,15 @@ function initGraph(data) {
 
   /* ── removeNode: public API ──────────────────────────── */
   function removeNode(id) {
-    // Remove all links that involve this node (splice in reverse to be safe)
-    for (let i = links.length - 1; i >= 0; i--) {
-      const s = typeof links[i].source === 'object' ? links[i].source.id : links[i].source;
-      const t = typeof links[i].target === 'object' ? links[i].target.id : links[i].target;
-      if (s === id || t === id) links.splice(i, 1);
-    }
+    rebuildLinksForNode(id);
 
-    // Clean up references in other nodes' attacks / attackedBy lists
     nodes.forEach(n => {
-      n.attacks    = n.attacks.filter(x => x !== id);
-      n.attackedBy = n.attackedBy.filter(x => x !== id);
+      n.attacks     = n.attacks.filter(x => x !== id);
+      n.attackedBy  = n.attackedBy.filter(x => x !== id);
+      n.supports    = n.supports.filter(x => x !== id);
+      n.supportedBy = n.supportedBy.filter(x => x !== id);
     });
 
-    // Remove the node itself
     const idx = nodes.findIndex(n => n.id === id);
     if (idx !== -1) nodes.splice(idx, 1);
 
@@ -389,16 +506,27 @@ function initGraph(data) {
 
   /* ── exportJSON: serialise current graph state ───────── */
   function exportJSON() {
-    // Re-derive clean attacks / attackedBy from the live links array
-    // (link.source / link.target may be d3 node objects at this point)
     const attacksMap    = {};
     const attackedByMap = {};
-    nodes.forEach(n => { attacksMap[n.id] = []; attackedByMap[n.id] = []; });
+    const supportsMap   = {};
+    const supportedByMap = {};
+    nodes.forEach(n => {
+      attacksMap[n.id]    = [];
+      attackedByMap[n.id] = [];
+      supportsMap[n.id]   = [];
+      supportedByMap[n.id] = [];
+    });
+
     links.forEach(l => {
       const s = typeof l.source === 'object' ? l.source.id : l.source;
       const t = typeof l.target === 'object' ? l.target.id : l.target;
-      if (!attacksMap[s].includes(t))    attacksMap[s].push(t);
-      if (!attackedByMap[t].includes(s)) attackedByMap[t].push(s);
+      if (l.type === 'support') {
+        if (!supportsMap[s].includes(t))    supportsMap[s].push(t);
+        if (!supportedByMap[t].includes(s)) supportedByMap[t].push(s);
+      } else {
+        if (!attacksMap[s].includes(t))    attacksMap[s].push(t);
+        if (!attackedByMap[t].includes(s)) attackedByMap[t].push(s);
+      }
     });
 
     const exportData = {
@@ -406,13 +534,15 @@ function initGraph(data) {
       cats:         data.cats,
       globalScores: data.globalScores,
       nodes: nodes.map(n => ({
-        id:         n.id,
-        label:      n.label,
-        cat:        n.cat,
-        score:      n.score,
-        desc:       n.desc,
-        attacks:    attacksMap[n.id]    || [],
-        attackedBy: attackedByMap[n.id] || [],
+        id:          n.id,
+        label:       n.label,
+        cat:         n.cat,
+        score:       n.score,
+        desc:        n.desc,
+        attacks:     attacksMap[n.id]    || [],
+        attackedBy:  attackedByMap[n.id] || [],
+        supports:    supportsMap[n.id]   || [],
+        supportedBy: supportedByMap[n.id] || [],
       })),
     };
 
@@ -435,13 +565,15 @@ function initGraph(data) {
     updateGraph,
     updateNodeScores,
     updateNodeVisuals,
+    updateInactiveVisuals,
     addNode,
     updateNode,
     removeNode,
     exportJSON,
     data,
-    getNodeSel: () => nodeSel,
-    getLinkSel: () => linkSel,
-    setOnNodeClick: fn => { onNodeClick = fn; },
+    getNodeSel:           () => nodeSel,
+    getLinkSel:           () => linkSel,
+    setOnNodeClick:       fn => { onNodeClick = fn; },
+    setOnInactiveToggle:  fn => { onInactiveToggle = fn; },
   };
 }
