@@ -19,7 +19,8 @@
   --accent: #5dba6f;
 
   /* Category colours — must mirror "colors" in data.json */
-  --action:  #da5d4d;
+  /* --action:  #da5d4d; */
+  --action:  #9b8fd4;
   --env:  #4caf78;
   --eco: #dca450;
 

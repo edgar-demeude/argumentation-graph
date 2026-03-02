@@ -1,0 +1,84 @@
+{
+  "colors": {
+    "action": "#9b8fd4",
+    "env":    "#4caf78",
+    "eco":    "#dca450"
+  },
+  "cats": {
+    "action": "Fréquence d'arrosage",
+    "env":    "Croyances Environnementales",
+    "eco":    "Croyances Économiques"
+  },
+  "globalScores": [
+    { "label": "Actions", "cat": "action", "value": 0.0 },
+    { "label": "Impact Env.", "cat": "env", "value": 0.0 },
+    { "label": "Impact Eco.", "cat": "eco", "value": 0.0 }
+  ],
+  "nodes": [
+    {
+      "id": "A1",
+      "label": "Arroser\n1x / jour",
+      "cat": "action",
+      "score": 0.0,
+      "desc": "Arrosage minimal. Idéal pour la nappe phréatique, mais risque de stress hydrique pour la plante.",
+      "attacks": ["B_ECO_RENDEMENT"],
+      "attackedBy": []
+    },
+    {
+      "id": "A2",
+      "label": "Arroser\n2x / jour",
+      "cat": "action",
+      "score": 0.0,
+      "desc": "Le standard horticole. Assure une croissance stable mais commence à peser sur la ressource en eau.",
+      "attacks": ["B_ENV_EAU"],
+      "attackedBy": []
+    },
+    {
+      "id": "A3",
+      "label": "Arroser\n3x / jour",
+      "cat": "action",
+      "score": 0.0,
+      "desc": "Arrosage intensif. On cherche le rendement maximal, au mépris de l'évaporation et du lessivage des sols.",
+      "attacks": ["B_ENV_EAU", "B_ENV_SOL", "B_ECO_FACTURE"],
+      "attackedBy": []
+    },
+
+    {
+      "id": "B_ENV_EAU",
+      "label": "Économiser l'eau",
+      "cat": "env",
+      "score": 0.0,
+      "desc": "La conviction que l'eau douce est rare. Plus on arrose (A2, A3), plus ce score s'effondre.",
+      "attacks": ["B_ECO_RENDEMENT"],
+      "attackedBy": ["A2", "A3"]
+    },
+    {
+      "id": "B_ENV_SOL",
+      "label": "Préserver la\nqualité du sol",
+      "cat": "env",
+      "score": 0.0,
+      "desc": "L'arrosage excessif (A3) lessive les nutriments et tasse la terre. Mauvais pour l'écosystème à long terme.",
+      "attacks": [],
+      "attackedBy": ["A3"]
+    },
+
+    {
+      "id": "B_ECO_RENDEMENT",
+      "label": "Maximiser la\nrécolte",
+      "cat": "eco",
+      "score": 0.0,
+      "desc": "L'objectif est de produire le plus possible. Attaqué par le manque d'eau (A1) ou par une éthique de sobriété trop radicale (B_ENV_EAU).",
+      "attacks": ["B_ENV_EAU"],
+      "attackedBy": ["A1", "B_ENV_EAU"]
+    },
+    {
+      "id": "B_ECO_FACTURE",
+      "label": "Minimiser les\ncharges",
+      "cat": "eco",
+      "score": 0.0,
+      "desc": "Le coût de l'eau est une dépense d'exploitation. L'arrosage intensif dégrade la rentabilité directe.",
+      "attacks": [],
+      "attackedBy": ["A2", "A3"]
+    }
+  ]
+}
