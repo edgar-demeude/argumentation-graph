@@ -12,7 +12,7 @@
 
 const GRAPH_CONFIG = {
   nodeRadius:       40,
-  labelFontSize:    11,
+  labelFontSize:    17,
   idFontSize:       10,
   linkDistance:     145,
   linkStrength:     0.5,
@@ -67,6 +67,7 @@ function initGraph(data) {
   function rescaleText(k) {
     const labelSize = GRAPH_CONFIG.labelFontSize / k;
     const idSize    = GRAPH_CONFIG.idFontSize    / k;
+    const scoreSize = 10 / k;
     const lineGap   = 13 / k;
 
     g.selectAll('.node .node-label').attr('font-size', labelSize + 'px');
@@ -78,6 +79,10 @@ function initGraph(data) {
     g.selectAll('.node .node-id')
       .attr('font-size', idSize + 'px')
       .attr('y', -(GRAPH_CONFIG.nodeRadius + 6) / k);
+
+    g.selectAll('.node .node-score')
+      .attr('font-size', scoreSize + 'px')
+      .attr('y', (GRAPH_CONFIG.nodeRadius + 14) / k);
   }
 
   /* ── Arrowhead markers ────────────────────────────────── */
@@ -267,6 +272,10 @@ function initGraph(data) {
     sim.nodes(nodes);
     sim.force('link').links(links);
     sim.alpha(0.3).restart();
+
+    // Ensure text is correctly scaled for newly added or updated nodes
+    const currentK = d3.zoomTransform(svgEl.node()).k;
+    rescaleText(currentK);
   }
 
   /* ── updateNodeScores: update score rings and text ───── */
@@ -282,6 +291,9 @@ function initGraph(data) {
 
     nodeSel.selectAll('.node-score')
       .text(d => (d.score || 0).toFixed(2));
+    
+    const currentK = d3.zoomTransform(svgEl.node()).k;
+    rescaleText(currentK);
   }
 
   /* ── updateNodeVisuals: refresh all visual attrs on existing nodes ── */
@@ -316,6 +328,9 @@ function initGraph(data) {
     });
 
     updateInactiveVisuals();
+    
+    const currentK = d3.zoomTransform(svgEl.node()).k;
+    rescaleText(currentK);
   }
 
   /* ── updateInactiveVisuals: apply/remove gray-out for inactive actions */
@@ -344,6 +359,9 @@ function initGraph(data) {
           return l.type === 'support' ? 'url(#arrow-support)' : 'url(#arrow-attack)';
         });
     }
+
+    const currentK = d3.zoomTransform(svgEl.node()).k;
+    rescaleText(currentK);
   }
 
   /* ── Callback slot for inactive toggle (set by ui.js) ── */

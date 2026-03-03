@@ -16,7 +16,7 @@
   "nodes": [
     {
       "id": "A1",
-      "label": "Water the plants",
+      "label": "Water \nthe plants",
       "cat": "action",
       "score": 0.0,
       "desc": "Use tap water to maintain hydration. Essential for growth but impacts the water table and operational costs.",
