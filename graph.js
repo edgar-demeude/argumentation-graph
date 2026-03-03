@@ -391,12 +391,14 @@ function initGraph(data) {
   });
 
   /* ── Helper: rebuild all links for a given node ──────── */
-  function rebuildLinksForNode(nodeId) {
-    // Remove all existing links for this node
+  function rebuildLinksForNode(nodeId, outgoingOnly = false) {
+    // Remove existing links for this node
     for (let i = links.length - 1; i >= 0; i--) {
       const s = typeof links[i].source === 'object' ? links[i].source.id : links[i].source;
       const t = typeof links[i].target === 'object' ? links[i].target.id : links[i].target;
-      if (s === nodeId || t === nodeId) links.splice(i, 1);
+      if (s === nodeId || (!outgoingOnly && t === nodeId)) {
+        links.splice(i, 1);
+      }
     }
   }
 
@@ -432,15 +434,27 @@ function initGraph(data) {
     const node = nodes.find(n => n.id === id);
     if (!node) return;
 
-    // 1. Remove all existing links for this node
-    rebuildLinksForNode(id);
+    const idChanged = newData.id && newData.id !== id;
 
-    // 2. Clean up stale references in other nodes
-    nodes.forEach(n => {
-      if (n.id === id) return;
-      n.attacks     = n.attacks.filter(x => x !== id);
-      n.supports    = n.supports.filter(x => x !== id);
-    });
+    // 1. Remove only outgoing links if ID hasn't changed, otherwise remove all to rebuild
+    rebuildLinksForNode(id, !idChanged);
+
+    // 2. If ID changed, update all references in other nodes
+    if (idChanged) {
+      nodes.forEach(n => {
+        if (n.id === id) return;
+        n.attacks = n.attacks.map(x => x === id ? newData.id : x);
+        n.supports = n.supports.map(x => x === id ? newData.id : x);
+      });
+      // Also update incoming links targets in the 'links' array
+      links.forEach(l => {
+        if (typeof l.target === 'object') {
+          if (l.target.id === id) l.target = newData.id;
+        } else {
+          if (l.target === id) l.target = newData.id;
+        }
+      });
+    }
 
     // 3. Apply new data
     Object.assign(node, {
@@ -449,12 +463,11 @@ function initGraph(data) {
       supports:    newData.supports    || [],
     });
 
-    // 4. Re-add attack links
+    // 4. Re-add outgoing links
     node.attacks.forEach(tgtId => {
       links.push({ source: node.id, target: tgtId, type: 'attack' });
     });
 
-    // 5. Re-add support links
     node.supports.forEach(tgtId => {
       links.push({ source: node.id, target: tgtId, type: 'support' });
     });

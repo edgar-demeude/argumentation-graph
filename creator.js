@@ -121,10 +121,10 @@ function initCreatorPanel(gs) {
     });
   }
 
-  function renderAllTags() {
+  function renderAllTags(skipUpdate = false) {
     renderTags(attacksTags,     attacksTags_el,     '#e07777');
     renderTags(supportsTags,    supportsTags_el,    '#4caf78');
-    if (editingId) triggerRealTimeUpdate();
+    if (editingId && !skipUpdate) triggerRealTimeUpdate();
   }
 
   function addTag(inputEl, arr) {
@@ -169,7 +169,7 @@ function initCreatorPanel(gs) {
     buildDatalist();
     inputId.value = nextId();
     setCreateMode();
-    renderAllTags(); // After setting editingId to null to avoid updates
+    renderAllTags(true); // After setting editingId to null to avoid updates
   }
 
   gs.resetCreatorForm = resetForm;
@@ -190,7 +190,7 @@ function initCreatorPanel(gs) {
     formError.textContent = '';
     
     setEditMode(node.id); // set editingId first
-    renderAllTags(); // then render
+    renderAllTags(true); // then render
   };
 
   /* ── Collect form data ────────────────────────────────── */

@@ -8,12 +8,6 @@ const SEMANTICS_METHODS = {
 
 /**
  * Calculates gradual scores for all nodes in the graph.
- * Inactive nodes (node.inactive === true) are excluded from all calculations.
- *
- * @param {Array}  nodes           - Array of node objects.
- * @param {string} method          - The calculation method to use.
- * @param {Object} categoryWeights - Map of cat -> weight.
- * @returns {Object} A map of nodeId -> score.
  */
 function calculateSemantics(nodes, method = SEMANTICS_METHODS.HCATEGORIZER, categoryWeights = {}) {
   if (method === SEMANTICS_METHODS.HCATEGORIZER) {
@@ -25,31 +19,24 @@ function calculateSemantics(nodes, method = SEMANTICS_METHODS.HCATEGORIZER, cate
 /**
  * Extended weighted h-categorizer with support relations.
  *
- *   σ(a) = (1 + Σ_{b ∈ Sup(a)}  ω_{c(b)} · σ(b))
- *          ─────────────────────────────────────────────────────────
- *          (1 + Σ_{b ∈ Att(a)}  ω_{c(b)} · σ(b)
- *             + Σ_{b ∈ Sup(a)}  ω_{c(b)} · σ(b))
- *
  * MODIFICATION FOR STATE NODES:
- * 1. State nodes have a fixed score equal to their `value`.
- * 2. If a state node links to an action node, it modulates the action's outgoing impact.
+ * 1. State nodes have a fixed score σ(s) = s.value.
+ * 2. State nodes provide an "activation" factor to the nodes they link to.
+ *    mod(a) = (product of supporting state values) * (product of 1 - attacking state values)
+ * 3. Final score σ(a) = hCategorizer(a) * mod(a)
  */
 function calculateHCategorizer(nodes, categoryWeights = {}) {
   const maxIterations = 100;
   const epsilon = 1e-6;
 
-  // Only active nodes participate (except state nodes, which are always active but use their 'value')
+  // 1. Identify active nodes
   const activeNodes = nodes.filter(n => n.cat === 'state' || !n.inactive);
   const activeIds   = new Set(activeNodes.map(n => n.id));
 
   const catOf = {};
-  const valueOf = {};
-  activeNodes.forEach(n => {
-    catOf[n.id]   = n.cat;
-    valueOf[n.id] = (n.value !== undefined) ? n.value : 1.0;
-  });
+  activeNodes.forEach(n => { catOf[n.id] = n.cat; });
 
-  // Pre-calculate reverse maps for attacks and supports
+  // 2. Build reverse maps
   const attackedBy = {};
   const supportedBy = {};
   activeNodes.forEach(n => {
@@ -59,81 +46,69 @@ function calculateHCategorizer(nodes, categoryWeights = {}) {
 
   activeNodes.forEach(n => {
     (n.attacks || []).forEach(targetId => {
-      if (activeIds.has(targetId)) {
-        if (!attackedBy[targetId]) attackedBy[targetId] = [];
-        attackedBy[targetId].push(n.id);
-      }
+      if (activeIds.has(targetId)) attackedBy[targetId].push(n.id);
     });
     (n.supports || []).forEach(targetId => {
-      if (activeIds.has(targetId)) {
-        if (!supportedBy[targetId]) supportedBy[targetId] = [];
-        supportedBy[targetId].push(n.id);
-      }
+      if (activeIds.has(targetId)) supportedBy[targetId].push(n.id);
     });
   });
 
-  // Modulation map: how state nodes affect other nodes (actions)
-  // modulationFactor[targetId] = product of (connected state values)
+  // 3. Modulation: states affecting other nodes
   const modulationFactors = {};
   activeNodes.forEach(n => {
     if (n.cat === 'state') {
+      const val = (n.value !== undefined) ? n.value : 0.5;
       (n.supports || []).forEach(targetId => {
         if (activeIds.has(targetId)) {
-          modulationFactors[targetId] = (modulationFactors[targetId] || 1.0) * n.value;
+          modulationFactors[targetId] = (modulationFactors[targetId] || 1.0) * val;
         }
       });
-      // You can even have 'attacks' from state to actions to mean inverse modulation
       (n.attacks || []).forEach(targetId => {
         if (activeIds.has(targetId)) {
-          modulationFactors[targetId] = (modulationFactors[targetId] || 1.0) * (1 - n.value);
+          modulationFactors[targetId] = (modulationFactors[targetId] || 1.0) * (1 - val);
         }
       });
     }
   });
 
-  // Initialize scores
+  // 4. Initial scores
   let currentScores = {};
   activeNodes.forEach(n => {
-    if (n.cat === 'state') {
-      currentScores[n.id] = n.value;
-    } else {
-      currentScores[n.id] = 1.0;
-    }
+    currentScores[n.id] = (n.cat === 'state') ? (n.value || 0) : 1.0;
   });
 
+  // 5. Iterative calculation
   for (let iter = 0; iter < maxIterations; iter++) {
     const nextScores = {};
     let maxDiff = 0;
 
     activeNodes.forEach(n => {
-      // State nodes have fixed scores
       if (n.cat === 'state') {
-        nextScores[n.id] = n.value;
+        nextScores[n.id] = n.value || 0;
         return;
       }
-
-      const attackers  = attackedBy[n.id] || [];
-      const supporters = supportedBy[n.id] || [];
 
       let attackSum  = 0;
       let supportSum = 0;
 
-      attackers.forEach(id => {
-        // If the attacker is modulated by states
-        const mod = modulationFactors[id] !== undefined ? modulationFactors[id] : 1.0;
-        const w = categoryWeights[catOf[id]] !== undefined ? categoryWeights[catOf[id]] : 1.0;
-        attackSum += w * (currentScores[id] || 0) * mod;
+      (attackedBy[n.id] || []).forEach(srcId => {
+        const w = categoryWeights[catOf[srcId]] || 1.0;
+        attackSum += w * (currentScores[srcId] || 0);
       });
 
-      supporters.forEach(id => {
-        const mod = modulationFactors[id] !== undefined ? modulationFactors[id] : 1.0;
-        const w = categoryWeights[catOf[id]] !== undefined ? categoryWeights[catOf[id]] : 1.0;
-        supportSum += w * (currentScores[id] || 0) * mod;
+      (supportedBy[n.id] || []).forEach(srcId => {
+        const w = categoryWeights[catOf[srcId]] || 1.0;
+        supportSum += w * (currentScores[srcId] || 0);
       });
 
-      nextScores[n.id] = (1 + supportSum) / (1 + attackSum + supportSum);
+      // Base h-categorizer formula
+      const baseScore = (1 + supportSum) / (1 + attackSum + supportSum);
+      
+      // Apply modulation
+      const mod = (modulationFactors[n.id] !== undefined) ? modulationFactors[n.id] : 1.0;
+      nextScores[n.id] = baseScore * mod;
 
-      const diff = Math.abs(nextScores[n.id] - (currentScores[n.id] || 0));
+      const diff = Math.abs(nextScores[n.id] - currentScores[n.id]);
       if (diff > maxDiff) maxDiff = diff;
     });
 
@@ -141,7 +116,7 @@ function calculateHCategorizer(nodes, categoryWeights = {}) {
     if (maxDiff < epsilon) break;
   }
 
-  // Inactive nodes get score 0 (except states)
+  // Set score 0 for inactive nodes
   nodes.forEach(n => {
     if (n.cat !== 'state' && n.inactive) currentScores[n.id] = 0;
   });
@@ -150,11 +125,10 @@ function calculateHCategorizer(nodes, categoryWeights = {}) {
 }
 
 /**
- * Aggregates scores by category (excluding action and state categories and inactive nodes).
+ * Aggregates scores by category (excluding action and state).
  */
 function aggregateScores(nodes, categoryWeights = {}) {
   const categoryData = {};
-
   nodes
     .filter(n => !n.inactive && n.cat !== 'action' && n.cat !== 'state')
     .forEach(n => {
@@ -164,10 +138,8 @@ function aggregateScores(nodes, categoryWeights = {}) {
     });
 
   const categoryScores = {};
-
   for (const cat in categoryData) {
     categoryScores[cat] = categoryData[cat].sum / categoryData[cat].count;
   }
-
   return categoryScores;
 }
