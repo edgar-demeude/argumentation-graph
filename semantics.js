@@ -74,7 +74,7 @@ function calculateHCategorizer(nodes, categoryWeights = {}) {
   // 4. Initial scores
   let currentScores = {};
   activeNodes.forEach(n => {
-    currentScores[n.id] = (n.cat === 'state') ? (n.value || 0) : 1.0;
+    currentScores[n.id] = (n.cat === 'state') ? (n.value || 0) : 0.5;
   });
 
   // 5. Iterative calculation
@@ -101,10 +101,10 @@ function calculateHCategorizer(nodes, categoryWeights = {}) {
         supportSum += w * (currentScores[srcId] || 0);
       });
 
-      // Base h-categorizer formula
+      // Base h-categorizer formula (base 0.5)
       const baseScore = (1 + supportSum) / (1 + attackSum + supportSum);
       
-      // Apply modulation
+      // Apply modulation from states
       const mod = (modulationFactors[n.id] !== undefined) ? modulationFactors[n.id] : 1.0;
       nextScores[n.id] = baseScore * mod;
 

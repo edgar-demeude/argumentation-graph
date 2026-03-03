@@ -86,8 +86,17 @@ function initDetailPanel(gs) {
     }
 
     addBlock('Node score — extended h-categorizer', [
-      { tex: String.raw`\sigma(a) = \frac{1 + \displaystyle\sum_{b\in Sup(a)}\sigma(b)}{1 + \displaystyle\sum_{b\in Att(a)}\sigma(b) + \displaystyle\sum_{b\in Sup(a)}\sigma(b)}` },
-      { note: 'States modulate outgoing impact: if s supports a, impact of a is scaled by σ(s).' },
+      { tex: String.raw`\sigma(a) = \frac{1 + \displaystyle\sum_{b\in Sup(a)}\sigma(b)}{2 + \displaystyle\sum_{b\in Att(a)}\sigma(b) + \displaystyle\sum_{b\in Sup(a)}\sigma(b)} \cdot \mu(a)` },
+      { note: 'Base score: 0.5. Supporters raise σ(a) toward 1; attackers lower it toward 0.' },
+    ]);
+
+    addBlock('Notation', [
+      { tex: String.raw`Att(a),\; Sup(a)` },
+      { note: 'sets of attackers / supporters of a' },
+      { tex: String.raw`\sigma(a) \in (0, 1)` },
+      { note: 'gradual acceptability score of a' },
+      { tex: String.raw`\mu(a) \in [0, 1]` },
+      { note: 'state activation (product of state links)' },
     ]);
   }
 
