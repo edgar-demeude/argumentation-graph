@@ -1,0 +1,118 @@
+{
+  "colors": {
+    "action": "#9b8fd4",
+    "env": "#4caf78",
+    "eco": "#dca450"
+  },
+  "cats": {
+    "action": "Gardening Actions",
+    "env": "Environmental Health",
+    "eco": "Economic Prosperity"
+  },
+  "globalScores": [
+    { "label": "Eco-Balance", "cat": "env", "value": 0.0 },
+    { "label": "Profitability", "cat": "eco", "value": 0.0 }
+  ],
+  "nodes": [
+    {
+      "id": "A1",
+      "label": "Water the plants",
+      "cat": "action",
+      "score": 0.0,
+      "desc": "Direct manual watering of the garden. While it keeps plants alive, it consumes potable water resources and requires time.",
+      "attacks": ["ENV1"],
+      "supports": []
+    },
+    {
+      "id": "A2",
+      "label": "Use Synthetic\nFertilizer",
+      "cat": "action",
+      "score": 0.0,
+      "desc": "Boosts flower growth and market value quickly, but degrades long-term soil microbiome and leaks into groundwater.",
+      "attacks": [],
+      "supports": []
+    },
+    {
+      "id": "A3",
+      "label": "Manual\nHand-Weeding",
+      "cat": "action",
+      "score": 0.0,
+      "desc": "Removing weeds by hand avoids toxic chemicals, but is extremely labor-intensive and slows down expansion.",
+      "attacks": [],
+      "supports": []
+    },
+    {
+      "id": "A4",
+      "label": "Plant Monoculture\nCash-Crops",
+      "cat": "action",
+      "score": 0.0,
+      "desc": "Planting only the highest-selling flower species maximizes revenue but destroys local biodiversity and resilience.",
+      "attacks": [],
+      "supports": ["ECO1"]
+    },
+
+    {
+      "id": "ENV1",
+      "label": "Water\nConservation",
+      "cat": "env",
+      "score": 0.0,
+      "desc": "Fresh water is a finite resource. We must minimize consumption to protect the local watershed.",
+      "attacks": [],
+      "supports": []
+    },
+    {
+      "id": "ENV2",
+      "label": "Soil\nLiving Health",
+      "cat": "env",
+      "score": 0.0,
+      "desc": "Soil is a living ecosystem. We must avoid synthetic chemicals that kill beneficial microbes and fungi.",
+      "attacks": [],
+      "supports": []
+    },
+    {
+      "id": "ENV3",
+      "label": "Chemical-Free\nEcosystem",
+      "cat": "env",
+      "score": 0.0,
+      "desc": "Pollinators and birds depend on a toxin-free environment. We prioritize organic methods over pesticides.",
+      "attacks": [],
+      "supports": []
+    },
+    {
+      "id": "ENV4",
+      "label": "Species\nDiversity",
+      "cat": "env",
+      "score": 0.0,
+      "desc": "A resilient garden requires a variety of plants to support different insect species and prevent total crop failure.",
+      "attacks": [],
+      "supports": []
+    },
+    {
+      "id": "ECO1",
+      "label": "Maximum\nRevenue",
+      "cat": "eco",
+      "score": 0.0,
+      "desc": "The primary goal is to generate high sales to fund further garden expansion and agent upgrades.",
+      "attacks": [],
+      "supports": []
+    },
+    {
+      "id": "ECO2",
+      "label": "Lean\nOperations",
+      "cat": "eco",
+      "score": 0.0,
+      "desc": "Minimize external costs by using recycled materials and avoiding expensive store-bought supplies.",
+      "attacks": [],
+      "supports": []
+    },
+    {
+      "id": "ECO3",
+      "label": "Labor\nEfficiency",
+      "cat": "eco",
+      "score": 0.0,
+      "desc": "Time is money. The agent should minimize the number of actions required to produce a sellable product.",
+      "attacks": [],
+      "supports": []
+    }
+  ]
+}

@@ -55,6 +55,29 @@ function calculateHCategorizer(nodes, categoryWeights = {}) {
   const catOf = {};
   activeNodes.forEach(n => { catOf[n.id] = n.cat; });
 
+  // Pre-calculate reverse maps for attacks and supports
+  const attackedBy = {};
+  const supportedBy = {};
+  activeNodes.forEach(n => {
+    attackedBy[n.id] = [];
+    supportedBy[n.id] = [];
+  });
+
+  activeNodes.forEach(n => {
+    (n.attacks || []).forEach(targetId => {
+      if (activeIds.has(targetId)) {
+        if (!attackedBy[targetId]) attackedBy[targetId] = [];
+        attackedBy[targetId].push(n.id);
+      }
+    });
+    (n.supports || []).forEach(targetId => {
+      if (activeIds.has(targetId)) {
+        if (!supportedBy[targetId]) supportedBy[targetId] = [];
+        supportedBy[targetId].push(n.id);
+      }
+    });
+  });
+
   // Initialize scores to 1 for active nodes
   let currentScores = {};
   activeNodes.forEach(n => { currentScores[n.id] = 1.0; });
@@ -65,9 +88,9 @@ function calculateHCategorizer(nodes, categoryWeights = {}) {
 
     activeNodes.forEach(n => {
       // Active attackers of n
-      const attackers  = (n.attackedBy  || []).filter(id => activeIds.has(id));
+      const attackers  = attackedBy[n.id] || [];
       // Active supporters of n
-      const supporters = (n.supportedBy || []).filter(id => activeIds.has(id));
+      const supporters = supportedBy[n.id] || [];
 
       let attackSum  = 0;
       let supportSum = 0;

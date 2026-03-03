@@ -21,9 +21,7 @@
       "score": 0.0,
       "desc": "Industrial NPK for fast growth. It provides quick results but ignores long-term soil life.",
       "attacks": ["ENV2"],
-      "attackedBy": [],
-      "supports": ["ECO1"],
-      "supportedBy": []
+      "supports": ["ECO1"]
     },
     {
       "id": "A2",
@@ -32,9 +30,7 @@
       "score": 0.0,
       "desc": "Automated precise watering. Great for saving water but requires an expensive initial setup.",
       "attacks": ["ECO2"],
-      "attackedBy": [],
-      "supports": ["ENV1", "ECO1"],
-      "supportedBy": []
+      "supports": ["ENV1", "ECO1"]
     },
     {
       "id": "A3",
@@ -43,9 +39,7 @@
       "score": 0.0,
       "desc": "Natural waste recycling. Excellent for the soil, though it requires significant time and physical effort.",
       "attacks": ["ECO3"],
-      "attackedBy": [],
-      "supports": ["ENV2"],
-      "supportedBy": []
+      "supports": ["ENV2"]
     },
     {
       "id": "A4",
@@ -54,9 +48,7 @@
       "score": 0.0,
       "desc": "Using ladybugs and bees to control pests naturally without any toxic chemicals.",
       "attacks": ["ECO2"],
-      "attackedBy": [],
-      "supports": ["ENV3", "ENV4"],
-      "supportedBy": []
+      "supports": ["ENV3", "ENV4"]
     },
     {
       "id": "A5",
@@ -65,9 +57,7 @@
       "score": 0.0,
       "desc": "Strong chemicals to kill pests. Very effective for the harvest but dangerous for bees and water.",
       "attacks": ["ENV1", "ENV3"],
-      "attackedBy": [],
-      "supports": ["ECO1"],
-      "supportedBy": []
+      "supports": ["ECO1"]
     },
     {
       "id": "ENV1",
@@ -76,9 +66,7 @@
       "score": 0.0,
       "desc": "Keeping groundwater clean and available. Crucial for the future of the garden and the planet.",
       "attacks": [],
-      "attackedBy": ["A5", "ECO1"],
-      "supports": ["ENV2"],
-      "supportedBy": ["A2"]
+      "supports": ["ENV2"]
     },
     {
       "id": "ENV2",
@@ -87,9 +75,7 @@
       "score": 0.0,
       "desc": "A healthy soil full of microorganisms. The foundation of any sustainable food production.",
       "attacks": [],
-      "attackedBy": ["A1"],
-      "supports": ["ENV4", "ECO1"],
-      "supportedBy": ["A3", "ENV1"]
+      "supports": ["ENV4", "ECO1"]
     },
     {
       "id": "ENV3",
@@ -98,9 +84,7 @@
       "score": 0.0,
       "desc": "Protecting bees and butterflies. They are necessary for the reproduction of most plants.",
       "attacks": [],
-      "attackedBy": ["A5"],
-      "supports": ["ECO1"],
-      "supportedBy": ["A4"]
+      "supports": ["ECO1"]
     },
     {
       "id": "ENV4",
@@ -109,9 +93,7 @@
       "score": 0.0,
       "desc": "A rich ecosystem with many species. It makes the garden more resilient to diseases.",
       "attacks": [],
-      "attackedBy": [],
-      "supports": [],
-      "supportedBy": ["A4", "ENV2"]
+      "supports": []
     },
     {
       "id": "ECO1",
@@ -120,9 +102,7 @@
       "score": 0.0,
       "desc": "The total amount of food produced. High yield ensures the garden is productive and useful.",
       "attacks": ["ENV1"],
-      "attackedBy": [],
-      "supports": ["ECO4"],
-      "supportedBy": ["A1", "A2", "A5", "ENV2", "ENV3"]
+      "supports": ["ECO4"]
     },
     {
       "id": "ECO2",
@@ -131,9 +111,7 @@
       "score": 0.0,
       "desc": "Keeping initial costs low to avoid debt and financial stress at the beginning.",
       "attacks": [],
-      "attackedBy": ["A2", "A4"],
-      "supports": [],
-      "supportedBy": []
+      "supports": []
     },
     {
       "id": "ECO3",
@@ -142,9 +120,7 @@
       "score": 0.0,
       "desc": "Optimizing working hours. Important for gardeners who have other professional activities.",
       "attacks": [],
-      "attackedBy": ["A3"],
-      "supports": [],
-      "supportedBy": []
+      "supports": []
     },
     {
       "id": "ECO4",
@@ -153,9 +129,7 @@
       "score": 0.0,
       "desc": "Contributing to the community wealth by sharing or selling fresh local food.",
       "attacks": [],
-      "attackedBy": [],
-      "supports": [],
-      "supportedBy": ["ECO1"]
+      "supports": []
     }
   ]
 }

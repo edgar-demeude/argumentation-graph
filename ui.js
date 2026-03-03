@@ -156,13 +156,20 @@ function initDetailPanel(gs) {
 
     if (gs.fillCreatorForm) gs.fillCreatorForm(d);
 
-    const related = new Set([
-      d.id,
-      ...(d.attacks     || []),
-      ...(d.attackedBy  || []),
-      ...(d.supports    || []),
-      ...(d.supportedBy || []),
-    ]);
+    // Find nodes that attack or support 'd', and nodes that 'd' attacks or supports
+    const related = new Set([d.id]);
+    
+    // Nodes 'd' attacks/supports
+    (d.attacks || []).forEach(id => related.add(id));
+    (d.supports || []).forEach(id => related.add(id));
+
+    // Nodes that attack/support 'd'
+    gs.nodes.forEach(n => {
+      if ((n.attacks || []).includes(d.id) || (n.supports || []).includes(d.id)) {
+        related.add(n.id);
+      }
+    });
+
     nodeSel.classed('dimmed',      n => !related.has(n.id));
     linkSel.classed('dimmed',      l => !(l.source.id === d.id || l.target.id === d.id));
     linkSel.classed('highlighted', l =>   l.source.id === d.id || l.target.id === d.id);

@@ -19,90 +19,56 @@
       "label": "Water the plants",
       "cat": "action",
       "score": 0.0,
-      "desc": "Quick manual watering of the stall. Simple and achievable by the agent.",
-      "attacks": ["ENV1","ECO2"],
-      "attackedBy": [],
-      "supports": ["ECO1", "ECO3"],
-      "supportedBy": []
+      "desc": "Use tap water to maintain hydration. Essential for growth but impacts the water table and operational costs.",
+      "attacks": ["ENV1", "ECO2"],
+      "supports": ["ENV2", "ECO1"]
+    },
+    {
+      "id": "A2",
+      "label": "Do nothing",
+      "cat": "action",
+      "score": 0.0,
+      "desc": "Wait and observe. Saves all immediate resources but risks plant wilting and loss of potential income.",
+      "attacks": ["ENV2", "ECO1"],
+      "supports": ["ENV1", "ECO2"]
     },
 
     {
       "id": "ENV1",
-      "label": "Preserve \nwater",
+      "label": "Water\nConservation",
       "cat": "env",
       "score": 0.0,
-      "desc": "Propreté et disponibilité de l'eau pour le jardin.",
-      "attacks": ["ENV2"],
-      "attackedBy": ["A1", "ECO1", "ECO2"],
-      "supports": ["ENV2", "ENV4"],
-      "supportedBy": ["ENV4", "ENV2"]
+      "desc": "Fresh water is a precious resource. Avoiding unnecessary usage is key to long-term environmental sustainability.",
+      "attacks": [],
+      "supports": []
     },
     {
       "id": "ENV2",
-      "label": "Preserve soil\nvitality",
+      "label": "Plant\nVitality",
       "cat": "env",
       "score": 0.0,
-      "desc": "Richesse du sol en matière organique et micro-organismes.",
-      "attacks": ["ENV4"],
-      "attackedBy": ["ENV1", "ECO3"],
-      "supports": ["ENV4", "ECO1"],
-      "supportedBy": ["ENV1", "ECO4"]
-    },
-    {
-      "id": "ENV3",
-      "label": "Preserve pollinator\nhealth",
-      "cat": "env",
-      "score": 0.0,
-      "desc": "Santé des abeilles et autres pollinisateurs.",
-      "attacks": ["ECO2"],
-      "attackedBy": ["ECO1", "ENV2"],
-      "supports": ["ECO1"],
-      "supportedBy": ["ENV4", "ECO4"]
-    },
-    {
-      "id": "ENV4",
-      "label": "Preserve \nbiodiversity",
-      "cat": "env",
-      "score": 0.0,
-      "desc": "Diversité des espèces et résilience de l'écosystème.",
-      "attacks": ["ECO2"],
-      "attackedBy": ["ECO1"],
-      "supports": ["ENV1", "ENV3"],
-      "supportedBy": ["ENV2", "ENV3"]
+      "desc": "Living organisms have a right to thrive. Allowing plants to die is a failure of the gardener's ecological duty.",
+      "attacks": [],
+      "supports": []
     },
 
     {
       "id": "ECO1",
-      "label": "Harvest\nYield",
+      "label": "Maximize\nRevenue",
       "cat": "eco",
       "score": 0.0,
-      "desc": "Quantité totale produite — important pour la productivité.",
-      "attacks": ["ENV1"],
-      "attackedBy": ["ENV4", "ENV3"],
-      "supports": ["ECO2"],
-      "supportedBy": ["ENV2", "ENV3", "A1"]
+      "desc": "Selling healthy flowers is the only way to sustain the business and allow for future investments.",
+      "attacks": [],
+      "supports": []
     },
     {
       "id": "ECO2",
-      "label": "Low Cost",
+      "label": "Minimize\nCosts",
       "cat": "eco",
       "score": 0.0,
-      "desc": "Coûts faibles pour démarrer le jardin sans endettement.",
-      "attacks": ["ECO3"],
-      "attackedBy": ["ECO1", "ENV2", "A1"],
-      "supports": ["ECO3"],
-      "supportedBy": ["ENV1"]
-    },
-    {
-      "id": "ECO3",
-      "label": "Time\nEfficiency",
-      "cat": "eco",
-      "score": 0.0,
-      "desc": "Optimisation du temps de travail du jardinier.",
-      "attacks": ["ECO1"],
-      "attackedBy": ["ENV2", "ECO2"],
-      "supports": ["ECO1"],
-      "supportedBy": ["ECO2", "ENV4", "A1"]
+      "desc": "Profit is Revenue minus Costs. Keeping utility bills low is essential for a high profit margin.",
+      "attacks": [],
+      "supports": []
     }
   ]
 }

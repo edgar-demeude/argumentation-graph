@@ -29,9 +29,7 @@ function initGraph(data) {
   const nodes = data.nodes.map(n => ({
     ...n,
     attacks:     [...(n.attacks    || [])],
-    attackedBy:  [...(n.attackedBy || [])],
     supports:    [...(n.supports    || [])],
-    supportedBy: [...(n.supportedBy || [])],
     inactive: (n.cat !== 'action') ? !!n.inactive : true,  // only action nodes are inactive
   }));
 
@@ -395,37 +393,17 @@ function initGraph(data) {
   /* ── addNode: public API ──────────────────────────────── */
   function addNode(nodeObj) {
     nodeObj.attacks     = nodeObj.attacks     || [];
-    nodeObj.attackedBy  = nodeObj.attackedBy  || [];
     nodeObj.supports    = nodeObj.supports    || [];
-    nodeObj.supportedBy = nodeObj.supportedBy || [];
     nodeObj.inactive    = false;
 
     nodes.push(nodeObj);
 
     nodeObj.attacks.forEach(tgtId => {
       links.push({ source: nodeObj.id, target: tgtId, type: 'attack' });
-      const tgt = nodes.find(n => n.id === tgtId);
-      if (tgt && !tgt.attackedBy.includes(nodeObj.id)) tgt.attackedBy.push(nodeObj.id);
-    });
-
-    nodeObj.attackedBy.forEach(srcId => {
-      if (!linkExists(srcId, nodeObj.id, 'attack'))
-        links.push({ source: srcId, target: nodeObj.id, type: 'attack' });
-      const src = nodes.find(n => n.id === srcId);
-      if (src && !src.attacks.includes(nodeObj.id)) src.attacks.push(nodeObj.id);
     });
 
     nodeObj.supports.forEach(tgtId => {
       links.push({ source: nodeObj.id, target: tgtId, type: 'support' });
-      const tgt = nodes.find(n => n.id === tgtId);
-      if (tgt && !tgt.supportedBy.includes(nodeObj.id)) tgt.supportedBy.push(nodeObj.id);
-    });
-
-    nodeObj.supportedBy.forEach(srcId => {
-      if (!linkExists(srcId, nodeObj.id, 'support'))
-        links.push({ source: srcId, target: nodeObj.id, type: 'support' });
-      const src = nodes.find(n => n.id === srcId);
-      if (src && !src.supports.includes(nodeObj.id)) src.supports.push(nodeObj.id);
     });
 
     updateGraph();
@@ -443,44 +421,24 @@ function initGraph(data) {
     nodes.forEach(n => {
       if (n.id === id) return;
       n.attacks     = n.attacks.filter(x => x !== id);
-      n.attackedBy  = n.attackedBy.filter(x => x !== id);
       n.supports    = n.supports.filter(x => x !== id);
-      n.supportedBy = n.supportedBy.filter(x => x !== id);
     });
 
     // 3. Apply new data
     Object.assign(node, {
       ...newData,
+      attacks:     newData.attacks     || [],
       supports:    newData.supports    || [],
-      supportedBy: newData.supportedBy || [],
     });
 
     // 4. Re-add attack links
     node.attacks.forEach(tgtId => {
       links.push({ source: node.id, target: tgtId, type: 'attack' });
-      const tgt = nodes.find(n => n.id === tgtId);
-      if (tgt && !tgt.attackedBy.includes(node.id)) tgt.attackedBy.push(node.id);
-    });
-
-    node.attackedBy.forEach(srcId => {
-      if (!linkExists(srcId, node.id, 'attack'))
-        links.push({ source: srcId, target: node.id, type: 'attack' });
-      const src = nodes.find(n => n.id === srcId);
-      if (src && !src.attacks.includes(node.id)) src.attacks.push(node.id);
     });
 
     // 5. Re-add support links
     node.supports.forEach(tgtId => {
       links.push({ source: node.id, target: tgtId, type: 'support' });
-      const tgt = nodes.find(n => n.id === tgtId);
-      if (tgt && !tgt.supportedBy.includes(node.id)) tgt.supportedBy.push(node.id);
-    });
-
-    node.supportedBy.forEach(srcId => {
-      if (!linkExists(srcId, node.id, 'support'))
-        links.push({ source: srcId, target: node.id, type: 'support' });
-      const src = nodes.find(n => n.id === srcId);
-      if (src && !src.supports.includes(node.id)) src.supports.push(node.id);
     });
 
     updateGraph();
@@ -493,9 +451,7 @@ function initGraph(data) {
 
     nodes.forEach(n => {
       n.attacks     = n.attacks.filter(x => x !== id);
-      n.attackedBy  = n.attackedBy.filter(x => x !== id);
       n.supports    = n.supports.filter(x => x !== id);
-      n.supportedBy = n.supportedBy.filter(x => x !== id);
     });
 
     const idx = nodes.findIndex(n => n.id === id);
@@ -507,14 +463,10 @@ function initGraph(data) {
   /* ── exportJSON: serialise current graph state ───────── */
   function exportJSON() {
     const attacksMap    = {};
-    const attackedByMap = {};
     const supportsMap   = {};
-    const supportedByMap = {};
     nodes.forEach(n => {
       attacksMap[n.id]    = [];
-      attackedByMap[n.id] = [];
       supportsMap[n.id]   = [];
-      supportedByMap[n.id] = [];
     });
 
     links.forEach(l => {
@@ -522,10 +474,8 @@ function initGraph(data) {
       const t = typeof l.target === 'object' ? l.target.id : l.target;
       if (l.type === 'support') {
         if (!supportsMap[s].includes(t))    supportsMap[s].push(t);
-        if (!supportedByMap[t].includes(s)) supportedByMap[t].push(s);
       } else {
         if (!attacksMap[s].includes(t))    attacksMap[s].push(t);
-        if (!attackedByMap[t].includes(s)) attackedByMap[t].push(s);
       }
     });
 
@@ -540,9 +490,7 @@ function initGraph(data) {
         score:       n.score,
         desc:        n.desc,
         attacks:     attacksMap[n.id]    || [],
-        attackedBy:  attackedByMap[n.id] || [],
         supports:    supportsMap[n.id]   || [],
-        supportedBy: supportedByMap[n.id] || [],
       })),
     };
 

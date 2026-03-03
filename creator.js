@@ -9,9 +9,7 @@ function initCreatorPanel(gs) {
 
   /* ── State ────────────────────────────────────────────── */
   let attacksTags      = [];
-  let attackedByTags   = [];
   let supportsTags     = [];
-  let supportedByTags  = [];
   let editingId        = null;   // null = create mode, string = edit mode
 
   /* ── DOM references ───────────────────────────────────── */
@@ -20,13 +18,9 @@ function initCreatorPanel(gs) {
   const selectCat          = document.getElementById('new-cat');
   const textaDesc          = document.getElementById('new-desc');
   const attacksInput       = document.getElementById('attacks-input');
-  const attacksByInput     = document.getElementById('attackedby-input');
   const supportsInput      = document.getElementById('supports-input');
-  const supportedByInput   = document.getElementById('supportedby-input');
   const attacksTags_el     = document.getElementById('attacks-tags');
-  const attacksByTags_el   = document.getElementById('attackedby-tags');
   const supportsTags_el    = document.getElementById('supports-tags');
-  const supportedByTags_el = document.getElementById('supportedby-tags');
   const formError          = document.getElementById('form-error');
   const btnRow             = document.getElementById('form-btn-row');
   const btnCreate          = document.getElementById('btn-create');
@@ -53,7 +47,7 @@ function initCreatorPanel(gs) {
 
   /* ── Datalists ────────────────────────────────────────── */
   function buildDatalist() {
-    ['attacks-list', 'attackedby-list', 'supports-list', 'supportedby-list'].forEach(listId => {
+    ['attacks-list', 'supports-list'].forEach(listId => {
       const dl = document.getElementById(listId);
       dl.innerHTML = '';
       nodes.forEach(n => {
@@ -77,9 +71,7 @@ function initCreatorPanel(gs) {
       btn.addEventListener('click', () => {
         const id = btn.dataset.id;
         if (container === attacksTags_el)     attacksTags     = attacksTags.filter(x => x !== id);
-        else if (container === attacksByTags_el)  attackedByTags  = attackedByTags.filter(x => x !== id);
         else if (container === supportsTags_el)   supportsTags    = supportsTags.filter(x => x !== id);
-        else if (container === supportedByTags_el) supportedByTags = supportedByTags.filter(x => x !== id);
         renderAllTags();
       });
     });
@@ -87,9 +79,7 @@ function initCreatorPanel(gs) {
 
   function renderAllTags() {
     renderTags(attacksTags,     attacksTags_el,     '#e07777');
-    renderTags(attackedByTags,  attacksByTags_el,   '#e0a070');
     renderTags(supportsTags,    supportsTags_el,    '#4caf78');
-    renderTags(supportedByTags, supportedByTags_el, '#70c090');
   }
 
   function addTag(inputEl, arr) {
@@ -117,9 +107,7 @@ function initCreatorPanel(gs) {
   /* ── Reset form ───────────────────────────────────────── */
   function resetForm() {
     attacksTags     = [];
-    attackedByTags  = [];
     supportsTags    = [];
-    supportedByTags = [];
     renderAllTags();
     inputLabel.value      = '';
     textaDesc.value       = '';
@@ -138,9 +126,7 @@ function initCreatorPanel(gs) {
     selectCat.value  = node.cat;
     textaDesc.value  = node.desc || '';
     attacksTags      = [...(node.attacks     || [])];
-    attackedByTags   = [...(node.attackedBy  || [])];
     supportsTags     = [...(node.supports    || [])];
-    supportedByTags  = [...(node.supportedBy || [])];
     formError.textContent = '';
     renderAllTags();
     setEditMode(node.id);
@@ -164,9 +150,7 @@ function initCreatorPanel(gs) {
       cat,
       desc:        desc || '',
       attacks:     [...attacksTags],
-      attackedBy:  [...attackedByTags],
       supports:    [...supportsTags],
-      supportedBy: [...supportedByTags],
     };
   }
 
@@ -241,18 +225,8 @@ function initCreatorPanel(gs) {
   });
   document.getElementById('btn-add-attack').addEventListener('click', () => addTag(attacksInput, attacksTags));
 
-  attacksByInput.addEventListener('keydown', e => {
-    if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); addTag(attacksByInput, attackedByTags); }
-  });
-  document.getElementById('btn-add-attackedby').addEventListener('click', () => addTag(attacksByInput, attackedByTags));
-
   supportsInput.addEventListener('keydown', e => {
     if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); addTag(supportsInput, supportsTags); }
   });
   document.getElementById('btn-add-support').addEventListener('click', () => addTag(supportsInput, supportsTags));
-
-  supportedByInput.addEventListener('keydown', e => {
-    if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); addTag(supportedByInput, supportedByTags); }
-  });
-  document.getElementById('btn-add-supportedby').addEventListener('click', () => addTag(supportedByInput, supportedByTags));
 }
