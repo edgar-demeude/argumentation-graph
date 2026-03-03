@@ -1,0 +1,108 @@
+{
+  "colors": {
+    "action": "#9b8fd4",
+    "env": "#4caf78",
+    "eco": "#dca450"
+  },
+  "cats": {
+    "action": "Gardening Actions",
+    "env": "Environmental Health",
+    "eco": "Economic Prosperity"
+  },
+  "globalScores": [
+    { "label": "Eco-Balance", "cat": "env", "value": 0.0 },
+    { "label": "Profitability", "cat": "eco", "value": 0.0 }
+  ],
+  "nodes": [
+    {
+      "id": "A1",
+      "label": "Water the plants",
+      "cat": "action",
+      "score": 0.0,
+      "desc": "Quick manual watering of the stall. Simple and achievable by the agent.",
+      "attacks": ["ENV1","ECO2"],
+      "attackedBy": [],
+      "supports": ["ECO1", "ECO3"],
+      "supportedBy": []
+    },
+
+    {
+      "id": "ENV1",
+      "label": "Preserve \nwater",
+      "cat": "env",
+      "score": 0.0,
+      "desc": "Propreté et disponibilité de l'eau pour le jardin.",
+      "attacks": ["ENV2"],
+      "attackedBy": ["A1", "ECO1", "ECO2"],
+      "supports": ["ENV2", "ENV4"],
+      "supportedBy": ["ENV4", "ENV2"]
+    },
+    {
+      "id": "ENV2",
+      "label": "Preserve soil\nvitality",
+      "cat": "env",
+      "score": 0.0,
+      "desc": "Richesse du sol en matière organique et micro-organismes.",
+      "attacks": ["ENV4"],
+      "attackedBy": ["ENV1", "ECO3"],
+      "supports": ["ENV4", "ECO1"],
+      "supportedBy": ["ENV1", "ECO4"]
+    },
+    {
+      "id": "ENV3",
+      "label": "Preserve pollinator\nhealth",
+      "cat": "env",
+      "score": 0.0,
+      "desc": "Santé des abeilles et autres pollinisateurs.",
+      "attacks": ["ECO2"],
+      "attackedBy": ["ECO1", "ENV2"],
+      "supports": ["ECO1"],
+      "supportedBy": ["ENV4", "ECO4"]
+    },
+    {
+      "id": "ENV4",
+      "label": "Preserve \nbiodiversity",
+      "cat": "env",
+      "score": 0.0,
+      "desc": "Diversité des espèces et résilience de l'écosystème.",
+      "attacks": ["ECO2"],
+      "attackedBy": ["ECO1"],
+      "supports": ["ENV1", "ENV3"],
+      "supportedBy": ["ENV2", "ENV3"]
+    },
+
+    {
+      "id": "ECO1",
+      "label": "Harvest\nYield",
+      "cat": "eco",
+      "score": 0.0,
+      "desc": "Quantité totale produite — important pour la productivité.",
+      "attacks": ["ENV1"],
+      "attackedBy": ["ENV4", "ENV3"],
+      "supports": ["ECO2"],
+      "supportedBy": ["ENV2", "ENV3", "A1"]
+    },
+    {
+      "id": "ECO2",
+      "label": "Low Cost",
+      "cat": "eco",
+      "score": 0.0,
+      "desc": "Coûts faibles pour démarrer le jardin sans endettement.",
+      "attacks": ["ECO3"],
+      "attackedBy": ["ECO1", "ENV2", "A1"],
+      "supports": ["ECO3"],
+      "supportedBy": ["ENV1"]
+    },
+    {
+      "id": "ECO3",
+      "label": "Time\nEfficiency",
+      "cat": "eco",
+      "score": 0.0,
+      "desc": "Optimisation du temps de travail du jardinier.",
+      "attacks": ["ECO1"],
+      "attackedBy": ["ENV2", "ECO2"],
+      "supports": ["ECO1"],
+      "supportedBy": ["ECO2", "ENV4", "A1"]
+    }
+  ]
+}

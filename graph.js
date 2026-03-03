@@ -249,11 +249,11 @@ function initGraph(data) {
           // Single click — select
           grp.on('click', (e, d) => { e.stopPropagation(); onNodeClick(d); });
 
-          // Right-click — toggle inactive (action nodes only)
+          // Right-click — toggle inactive
           grp.on('contextmenu', (e, d) => {
             e.preventDefault();
             e.stopPropagation();
-            if (d.cat !== 'action') return;
+            // if (d.cat !== 'action') return;
             d.inactive = !d.inactive;
             updateInactiveVisuals();
             if (onInactiveToggle) onInactiveToggle();
