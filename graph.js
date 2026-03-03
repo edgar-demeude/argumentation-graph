@@ -256,7 +256,7 @@ function initGraph(data) {
           grp.on('contextmenu', (e, d) => {
             e.preventDefault();
             e.stopPropagation();
-            // if (d.cat !== 'action') return;
+            if (d.cat === 'state') return;
             d.inactive = !d.inactive;
             updateInactiveVisuals();
             if (onInactiveToggle) onInactiveToggle();

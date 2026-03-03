@@ -21,7 +21,7 @@
       "label": "Soil\nHumidity",
       "cat": "state",
       "value": 0.5,
-      "desc": "Current moisture level in the soil. High humidity means the soil is already saturated.",
+      "desc": "Current moisture level in the soil. High humidity means the soil is already saturated. It is then a bad thing to do nothing, and a good thing to water the plants.",
       "attacks": ["A2"],
       "supports": ["A1"]
     },

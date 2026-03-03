@@ -21,17 +21,45 @@ function initCreatorPanel(gs) {
   valueInputGroup.className = 'field-group';
   valueInputGroup.id = 'new-value-group';
   valueInputGroup.innerHTML = `
-    <label for="new-value">Initial Value (0-1)</label>
-    <input id="new-value" type="number" step="0.1" min="0" max="1" class="field-input" value="0.5">
+    <label for="new-value">Initial Value</label>
+    <div class="weight-item" style="padding: 0; background: transparent; border: none;">
+      <div class="weight-label" style="margin-bottom: 5px;">
+        <span class="weight-val" id="new-value-label">0.50</span>
+      </div>
+      <input id="new-value" type="range" min="0" max="1" step="0.01" value="0.5" class="weight-range">
+    </div>
   `;
   textaDesc.parentNode.insertBefore(valueInputGroup, textaDesc.nextSibling);
   const inputValue = document.getElementById('new-value');
+  const inputValueLabel = document.getElementById('new-value-label');
+
+  inputValue.addEventListener('input', () => {
+    inputValueLabel.textContent = parseFloat(inputValue.value).toFixed(2);
+    if (editingId) triggerRealTimeUpdate();
+  });
   
   function toggleValueInput() {
     valueInputGroup.style.display = (selectCat.value === 'state') ? 'block' : 'none';
   }
-  selectCat.addEventListener('change', toggleValueInput);
+  selectCat.addEventListener('change', () => {
+    toggleValueInput();
+    if (editingId) triggerRealTimeUpdate();
+  });
   toggleValueInput();
+
+  function triggerRealTimeUpdate() {
+    if (!editingId) return;
+    const nodeData = collectFormData();
+    if (!nodeData) return;
+    gs.updateNode(editingId, nodeData);
+    if (gs.recalculate) gs.recalculate();
+  }
+
+  [inputId, inputLabel, textaDesc].forEach(el => {
+    el.addEventListener('input', () => {
+      if (editingId) triggerRealTimeUpdate();
+    });
+  });
 
   const attacksInput       = document.getElementById('attacks-input');
   const supportsInput      = document.getElementById('supports-input');
@@ -96,12 +124,16 @@ function initCreatorPanel(gs) {
   function renderAllTags() {
     renderTags(attacksTags,     attacksTags_el,     '#e07777');
     renderTags(supportsTags,    supportsTags_el,    '#4caf78');
+    if (editingId) triggerRealTimeUpdate();
   }
 
   function addTag(inputEl, arr) {
     const val = inputEl.value.trim().toUpperCase();
     if (!val) return;
-    if (!arr.includes(val)) { arr.push(val); renderAllTags(); }
+    if (!arr.includes(val)) { 
+      arr.push(val); 
+      renderAllTags();
+    }
     inputEl.value = '';
   }
 
@@ -111,6 +143,7 @@ function initCreatorPanel(gs) {
     btnRow.classList.remove('edit-mode');
     if (panelTitle) panelTitle.textContent = 'New argument';
     resetDeleteBtn();
+    btnCreate.style.display = 'block';
   }
 
   function setEditMode(id) {
@@ -118,21 +151,25 @@ function initCreatorPanel(gs) {
     btnRow.classList.add('edit-mode');
     if (panelTitle) panelTitle.textContent = 'Update argument';
     resetDeleteBtn();
+    btnCreate.style.display = 'none';
   }
 
   /* ── Reset form ───────────────────────────────────────── */
   function resetForm() {
     attacksTags     = [];
     supportsTags    = [];
-    renderAllTags();
     inputLabel.value      = '';
     textaDesc.value       = '';
-    if (inputValue) inputValue.value = '0.5';
-    if (toggleValueInput) toggleValueInput();
+    if (inputValue) {
+      inputValue.value = '0.5';
+      inputValueLabel.textContent = '0.50';
+    }
+    toggleValueInput();
     formError.textContent = '';
     buildDatalist();
     inputId.value = nextId();
     setCreateMode();
+    renderAllTags(); // After setting editingId to null to avoid updates
   }
 
   gs.resetCreatorForm = resetForm;
@@ -144,12 +181,16 @@ function initCreatorPanel(gs) {
     selectCat.value  = node.cat;
     if (toggleValueInput) toggleValueInput();
     textaDesc.value  = node.desc || '';
-    if (node.value !== undefined && inputValue) inputValue.value = node.value;
+    if (node.value !== undefined && inputValue) {
+      inputValue.value = node.value;
+      inputValueLabel.textContent = parseFloat(node.value).toFixed(2);
+    }
     attacksTags      = [...(node.attacks     || [])];
     supportsTags     = [...(node.supports    || [])];
     formError.textContent = '';
-    renderAllTags();
-    setEditMode(node.id);
+    
+    setEditMode(node.id); // set editingId first
+    renderAllTags(); // then render
   };
 
   /* ── Collect form data ────────────────────────────────── */
@@ -196,24 +237,6 @@ function initCreatorPanel(gs) {
     setTimeout(() => {
       btnCreate.textContent      = 'Create argument';
       btnCreate.style.background = '';
-    }, 1500);
-  });
-
-  /* ── UPDATE button ────────────────────────────────────── */
-  btnUpdate.addEventListener('click', () => {
-    const nodeData = collectFormData();
-    if (!nodeData) return;
-    if (!editingId) return;
-
-    gs.updateNode(editingId, nodeData);
-    if (gs.recalculate) gs.recalculate();
-    if (gs.deselect)    gs.deselect();
-
-    btnUpdate.textContent      = '✓ Updated!';
-    btnUpdate.style.background = data.colors[nodeData.cat] + '33';
-    setTimeout(() => {
-      btnUpdate.textContent      = 'Update argument';
-      btnUpdate.style.background = '';
     }, 1500);
   });
 

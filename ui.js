@@ -108,6 +108,9 @@ function initDetailPanel(gs) {
       d.value = parseFloat(range.value);
       label.textContent = d.value.toFixed(2);
       recalculate();
+      
+      // Also update the creator form if it's currently editing this node
+      if (gs.fillCreatorForm) gs.fillCreatorForm(d);
     });
   }
 
