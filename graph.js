@@ -30,7 +30,7 @@ function initGraph(data) {
     ...n,
     attacks:     [...(n.attacks    || [])],
     supports:    [...(n.supports    || [])],
-    inactive: (n.cat !== 'action') ? !!n.inactive : true,  // only action nodes are inactive
+    inactive: (n.cat === 'state') ? false : ((n.cat !== 'action') ? !!n.inactive : true),
   }));
 
   // Derive links from nodes[].attacks and nodes[].supports

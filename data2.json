@@ -2,18 +2,30 @@
   "colors": {
     "action": "#9b8fd4",
     "env": "#4caf78",
-    "eco": "#dca450"
+    "eco": "#dca450",
+    "state": "#4ab3f4"
   },
   "cats": {
     "action": "Gardening Actions",
     "env": "Environmental Health",
-    "eco": "Economic Prosperity"
+    "eco": "Economic Prosperity",
+    "state": "World State"
   },
   "globalScores": [
     { "label": "Eco-Balance", "cat": "env", "value": 0.0 },
     { "label": "Profitability", "cat": "eco", "value": 0.0 }
   ],
   "nodes": [
+    {
+      "id": "S1",
+      "label": "Soil\nHumidity",
+      "cat": "state",
+      "value": 0.5,
+      "desc": "Current moisture level in the soil. High humidity means the soil is already saturated.",
+      "attacks": ["A2"],
+      "supports": ["A1"]
+    },
+    
     {
       "id": "A1",
       "label": "Water \nthe plants",

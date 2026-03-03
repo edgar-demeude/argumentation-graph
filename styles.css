@@ -25,6 +25,7 @@ styles.css — Argumentation Graph · Ecological Gardening
   --action: #9b8fd4;
   --env: #4caf78;
   --eco: #dca450;
+  --state: #4ab3f4;
 
   /* Dynamic accent driven by creator.js (current selected category) */
   --creator-accent: #5dba6f;

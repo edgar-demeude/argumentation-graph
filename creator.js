@@ -17,6 +17,22 @@ function initCreatorPanel(gs) {
   const inputLabel         = document.getElementById('new-label');
   const selectCat          = document.getElementById('new-cat');
   const textaDesc          = document.getElementById('new-desc');
+  const valueInputGroup    = document.createElement('div');
+  valueInputGroup.className = 'field-group';
+  valueInputGroup.id = 'new-value-group';
+  valueInputGroup.innerHTML = `
+    <label for="new-value">Initial Value (0-1)</label>
+    <input id="new-value" type="number" step="0.1" min="0" max="1" class="field-input" value="0.5">
+  `;
+  textaDesc.parentNode.insertBefore(valueInputGroup, textaDesc.nextSibling);
+  const inputValue = document.getElementById('new-value');
+  
+  function toggleValueInput() {
+    valueInputGroup.style.display = (selectCat.value === 'state') ? 'block' : 'none';
+  }
+  selectCat.addEventListener('change', toggleValueInput);
+  toggleValueInput();
+
   const attacksInput       = document.getElementById('attacks-input');
   const supportsInput      = document.getElementById('supports-input');
   const attacksTags_el     = document.getElementById('attacks-tags');
@@ -111,6 +127,8 @@ function initCreatorPanel(gs) {
     renderAllTags();
     inputLabel.value      = '';
     textaDesc.value       = '';
+    if (inputValue) inputValue.value = '0.5';
+    if (toggleValueInput) toggleValueInput();
     formError.textContent = '';
     buildDatalist();
     inputId.value = nextId();
@@ -124,7 +142,9 @@ function initCreatorPanel(gs) {
     inputId.value    = node.id;
     inputLabel.value = node.label.replace(/\n/g, '\\n');
     selectCat.value  = node.cat;
+    if (toggleValueInput) toggleValueInput();
     textaDesc.value  = node.desc || '';
+    if (node.value !== undefined && inputValue) inputValue.value = node.value;
     attacksTags      = [...(node.attacks     || [])];
     supportsTags     = [...(node.supports    || [])];
     formError.textContent = '';
@@ -138,6 +158,7 @@ function initCreatorPanel(gs) {
     const label = inputLabel.value.trim();
     const cat   = selectCat.value;
     const desc  = textaDesc.value.trim();
+    const val   = inputValue ? parseFloat(inputValue.value) : 0.5;
 
     if (!id || !label || !cat) {
       formError.textContent = 'ID, Label, and Category are required.';
@@ -149,6 +170,7 @@ function initCreatorPanel(gs) {
       label:       label.replace(/\\n/g, '\n'),
       cat,
       desc:        desc || '',
+      value:       (cat === 'state') ? val : undefined,
       attacks:     [...attacksTags],
       supports:    [...supportsTags],
     };

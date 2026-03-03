@@ -49,9 +49,9 @@ function initDetailPanel(gs) {
   /* ── Global scores footer — value beliefs only ────────── */
   function renderGlobalScores(categoryScores) {
     const el = document.getElementById('global-scores');
-    // Show only non-action categories (the "value belief" dimensions)
+    // Show only non-action and non-state categories
     el.innerHTML = Object.entries(data.cats)
-      .filter(([cat]) => cat !== 'action')
+      .filter(([cat]) => cat !== 'action' && cat !== 'state')
       .map(([cat, label]) => {
         const val = categoryScores[cat] || 0;
         return `
@@ -61,6 +61,54 @@ function initDetailPanel(gs) {
           </div>
         `;
       }).join('');
+  }
+
+  /* ── State value slider ────────────────────────────────── */
+  function updateStateSlider(d) {
+    let container = document.getElementById('state-slider-container');
+    if (!container) {
+      container = document.createElement('div');
+      container.id = 'state-slider-container';
+      container.className = 'weight-section';
+      const sidebarRight = document.querySelector('.sidebar-right');
+      const detailPanel = document.querySelector('.detail-panel');
+      sidebarRight.insertBefore(container, detailPanel);
+    }
+
+    if (!d || d.cat !== 'state') {
+      container.style.display = 'none';
+      return;
+    }
+
+    container.style.display = 'block';
+    container.innerHTML = `
+      <h2>State value: ${d.label.replace('\n', ' ')}</h2>
+      <div class="weights-container">
+        <div class="weight-item">
+          <div class="weight-label">
+            <span>Current value</span>
+            <span class="weight-val" id="state-val-label">${(d.value || 0).toFixed(2)}</span>
+          </div>
+          <input
+            id="state-val-range"
+            type="range"
+            min="0"
+            max="1"
+            step="0.01"
+            value="${d.value || 0}"
+            class="weight-range"
+          >
+        </div>
+      </div>
+    `;
+
+    const range = document.getElementById('state-val-range');
+    const label = document.getElementById('state-val-label');
+    range.addEventListener('input', () => {
+      d.value = parseFloat(range.value);
+      label.textContent = d.value.toFixed(2);
+      recalculate();
+    });
   }
 
   /* ── Importance slider ────────────────────────────────── */
@@ -155,6 +203,7 @@ function initDetailPanel(gs) {
     const linkSel = gs.getLinkSel();
 
     if (gs.fillCreatorForm) gs.fillCreatorForm(d);
+    if (updateStateSlider) updateStateSlider(d);
 
     // Find nodes that attack or support 'd', and nodes that 'd' attacks or supports
     const related = new Set([d.id]);
@@ -184,6 +233,7 @@ function initDetailPanel(gs) {
     linkSel.classed('dimmed',      false);
     linkSel.classed('highlighted', false);
     if (gs.resetCreatorForm) gs.resetCreatorForm();
+    if (updateStateSlider) updateStateSlider(null);
   }
 
   /* ── Init ─────────────────────────────────────────────── */
