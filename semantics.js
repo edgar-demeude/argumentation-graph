@@ -30,14 +30,33 @@ function calculateHCategorizer(nodes, categoryWeights = {}) {
   const maxIterations = 100;
   const epsilon = 1e-6;
 
-  // 1. Identify active nodes
-  const activeNodes = nodes.filter(n => n.cat === 'state' || !n.inactive);
-  const activeIds   = new Set(activeNodes.map(n => n.id));
+  // 1. Pre-calculate state multipliers for all nodes
+  const stateMultipliers = {};
+  nodes.forEach(n => { stateMultipliers[n.id] = 1.0; });
+
+  nodes.filter(n => n.cat === 'state').forEach(stateNode => {
+    const val = stateNode.value || 0;
+    // If a state attacks a node, that node's strength is (1 - stateValue)
+    (stateNode.attacks || []).forEach(targetId => {
+      const tid = typeof targetId === 'string' ? targetId : targetId.id;
+      if (stateMultipliers[tid] !== undefined) {
+        stateMultipliers[tid] *= (1 - val);
+      }
+    });
+  });
+
+  // 2. Identify active nodes
+  // A node is active if it's not manually inactive AND its state multiplier is > 0
+  const activeNodes = nodes.filter(n => {
+    if (n.cat === 'state') return true;
+    return !n.inactive && stateMultipliers[n.id] > 0;
+  });
+  const activeIds = new Set(activeNodes.map(n => n.id));
 
   const catOf = {};
   activeNodes.forEach(n => { catOf[n.id] = n.cat; });
 
-  // 2. Build reverse maps
+  // 3. Build reverse maps
   const attackedBy = {};
   const supportedBy = {};
   const influencedBy = {};
@@ -49,16 +68,20 @@ function calculateHCategorizer(nodes, categoryWeights = {}) {
   });
 
   activeNodes.forEach(n => {
+    const multiplier = stateMultipliers[n.id];
+    
     // Static attacks
     (n.attacks || []).forEach(targetId => {
-      if (typeof targetId === 'string' && activeIds.has(targetId)) {
-        attackedBy[targetId].push({ srcId: n.id });
+      const tid = typeof targetId === 'string' ? targetId : targetId.id;
+      if (activeIds.has(tid)) {
+        attackedBy[tid].push({ srcId: n.id, multiplier });
       }
     });
     // Static supports
     (n.supports || []).forEach(targetId => {
-      if (typeof targetId === 'string' && activeIds.has(targetId)) {
-        supportedBy[targetId].push({ srcId: n.id });
+      const tid = typeof targetId === 'string' ? targetId : targetId.id;
+      if (activeIds.has(tid)) {
+        supportedBy[tid].push({ srcId: n.id, multiplier });
       }
     });
     // Dynamic influences
@@ -66,18 +89,18 @@ function calculateHCategorizer(nodes, categoryWeights = {}) {
       const targetId = attr.id;
       const conditionId = attr.conditionId;
       if (activeIds.has(targetId)) {
-        influencedBy[targetId].push({ srcId: n.id, conditionId });
+        influencedBy[targetId].push({ srcId: n.id, conditionId, multiplier });
       }
     });
   });
 
-  // 3. Initial scores (base 0.5)
+  // 4. Initial scores
   let currentScores = {};
   activeNodes.forEach(n => {
     currentScores[n.id] = (n.cat === 'state') ? (n.value || 0) : 0.5;
   });
 
-  // 4. Iterative calculation
+  // 5. Iterative calculation
   for (let iter = 0; iter < maxIterations; iter++) {
     const nextScores = {};
     let maxDiff = 0;
@@ -92,20 +115,20 @@ function calculateHCategorizer(nodes, categoryWeights = {}) {
       let supportSum = 0;
 
       // Static Attackers
-      (attackedBy[n.id] || []).forEach(({ srcId }) => {
-        const w = categoryWeights[catOf[srcId]] || 1.0;
+      (attackedBy[n.id] || []).forEach(({ srcId, multiplier }) => {
+        const w = (categoryWeights[catOf[srcId]] || 1.0) * multiplier;
         attackSum += w * (currentScores[srcId] || 0);
       });
 
       // Static Supporters
-      (supportedBy[n.id] || []).forEach(({ srcId }) => {
-        const w = categoryWeights[catOf[srcId]] || 1.0;
+      (supportedBy[n.id] || []).forEach(({ srcId, multiplier }) => {
+        const w = (categoryWeights[catOf[srcId]] || 1.0) * multiplier;
         supportSum += w * (currentScores[srcId] || 0);
       });
 
       // Dynamic Influences
-      (influencedBy[n.id] || []).forEach(({ srcId, conditionId }) => {
-        const w = categoryWeights[catOf[srcId]] || 1.0;
+      (influencedBy[n.id] || []).forEach(({ srcId, conditionId, multiplier }) => {
+        const w = (categoryWeights[catOf[srcId]] || 1.0) * multiplier;
         const srcScore = currentScores[srcId] || 0;
         
         let impact = 0;
@@ -113,12 +136,11 @@ function calculateHCategorizer(nodes, categoryWeights = {}) {
           const isInverse = conditionId.startsWith('!');
           const actualStateId = isInverse ? conditionId.substring(1) : conditionId;
           
-          if (activeIds.has(actualStateId)) {
-            const stateVal = currentScores[actualStateId];
-            // If normal: val=0 -> -1 (attack), val=1 -> +1 (support)
-            // If inverse: val=0 -> +1 (support), val=1 -> -1 (attack)
-            const multiplier = isInverse ? (1 - 2 * stateVal) : (2 * stateVal - 1);
-            impact = multiplier * srcScore;
+          const stateNode = nodes.find(sn => sn.id === actualStateId);
+          if (stateNode) {
+            const stateVal = stateNode.value || 0;
+            const multiplierCond = isInverse ? (1 - 2 * stateVal) : (2 * stateVal - 1);
+            impact = multiplierCond * srcScore;
           }
         }
         
@@ -127,7 +149,11 @@ function calculateHCategorizer(nodes, categoryWeights = {}) {
       });
 
       // Base h-categorizer formula
-      nextScores[n.id] = (1 + supportSum) / (2 + attackSum + supportSum);
+      // The node's own intrinsic weight is also scaled by its state multiplier
+      const nodeMultiplier = stateMultipliers[n.id];
+      const base = (1 + supportSum);
+      const div  = (1 + attackSum + supportSum);
+      nextScores[n.id] = (base / div) * nodeMultiplier;
 
       const diff = Math.abs(nextScores[n.id] - currentScores[n.id]);
       if (diff > maxDiff) maxDiff = diff;
@@ -139,7 +165,7 @@ function calculateHCategorizer(nodes, categoryWeights = {}) {
 
   // Set score 0 for inactive nodes
   nodes.forEach(n => {
-    if (n.cat !== 'state' && n.inactive) currentScores[n.id] = 0;
+    if (n.cat !== 'state' && (!activeIds.has(n.id))) currentScores[n.id] = 0;
   });
 
   return currentScores;

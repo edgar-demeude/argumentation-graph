@@ -100,7 +100,7 @@ function initGraph(data) {
   const nodesGroup = g.append('g').attr('class', 'nodes-group');
 
   /* ── Force simulation ─────────────────────────────────── */
-  const sim = d3.forceSimulation(nodes.filter(n => n.cat !== 'state'))
+  const sim = d3.forceSimulation(nodes)
     .force('link', d3.forceLink(links).id(d => d.id).distance(GRAPH_CONFIG.linkDistance).strength(GRAPH_CONFIG.linkStrength))
     .force('charge', d3.forceManyBody().strength(GRAPH_CONFIG.chargeStrength))
     .force('center', d3.forceCenter(width / 2, height / 2))
@@ -116,8 +116,8 @@ function initGraph(data) {
   function appendNodeVisuals(enter) {
     enter.append('circle').attr('class', 'node-bg').attr('r', GRAPH_CONFIG.nodeRadius).attr('fill', d => data.colors[d.cat] + '22').attr('stroke', d => data.colors[d.cat]);
     enter.append('circle').attr('class', 'score-ring').attr('r', GRAPH_CONFIG.nodeRadius).attr('fill', 'none').attr('stroke', d => data.colors[d.cat]).attr('stroke-opacity', 0.4).attr('stroke-width', 4)
-      .attr('stroke-dasharray', d => { const circ = 2 * Math.PI * GRAPH_CONFIG.nodeRadius; return `${(d.score || 0) * circ} ${circ}`; }).attr('transform', 'rotate(-90)');
-    enter.append('text').attr('class', 'node-score').attr('y', GRAPH_CONFIG.nodeRadius + 14).attr('font-size', '10px').attr('font-family', "'DM Mono', monospace").attr('fill', d => data.colors[d.cat]).attr('text-anchor', 'middle').text(d => (d.score || 0).toFixed(2));
+      .attr('stroke-dasharray', d => { const circ = 2 * Math.PI * GRAPH_CONFIG.nodeRadius; return d.cat === 'state' ? '0 1' : `${(d.score || 0) * circ} ${circ}`; }).attr('transform', 'rotate(-90)');
+    enter.append('text').attr('class', 'node-score').attr('y', GRAPH_CONFIG.nodeRadius + 14).attr('font-size', '10px').attr('font-family', "'DM Mono', monospace").attr('fill', d => data.colors[d.cat]).attr('text-anchor', 'middle').text(d => d.cat === 'state' ? (d.value * 100).toFixed(0) + '%' : (d.score || 0).toFixed(2));
     enter.each(function(d) {
       const el = d3.select(this); const lines = d.label.split('\n');
       lines.forEach((line, i) => { el.append('text').attr('class', 'node-label').attr('y', (i - (lines.length - 1) / 2) * 13).attr('font-size', GRAPH_CONFIG.labelFontSize + 'px').text(line); });
@@ -140,26 +140,19 @@ function initGraph(data) {
   let linkSel, linkLabelSel, nodeSel;
 
   function updateGraph() {
-    const visibleNodes = nodes.filter(n => n.cat !== 'state');
-    const visibleLinks = links.filter(l => {
-        const s = typeof l.source === 'object' ? l.source.id : l.source;
-        const t = typeof l.target === 'object' ? l.target.id : l.target;
-        return visibleNodes.find(n => n.id === s) && visibleNodes.find(n => n.id === t);
-    });
-
-    linkSel = linksGroup.selectAll('path.link').data(visibleLinks, l => `${l.type}:${typeof l.source === 'object' ? l.source.id : l.source}->${typeof l.target === 'object' ? l.target.id : l.target}:${l.conditionId || ''}`)
+    linkSel = linksGroup.selectAll('path.link').data(links, l => `${l.type}:${typeof l.source === 'object' ? l.source.id : l.source}->${typeof l.target === 'object' ? l.target.id : l.target}:${l.conditionId || ''}`)
       .join(
         enter => enter.append('path').attr('class', l => `link link-${l.type}`),
         update => update, exit => exit.remove()
       );
 
-    linkLabelSel = linksGroup.selectAll('text.link-label').data(visibleLinks.filter(l => l.type === 'influence'), l => `label:${l.source.id || l.source}->${l.target.id || l.target}:${l.conditionId}`)
+    linkLabelSel = linksGroup.selectAll('text.link-label').data(links.filter(l => l.type === 'influence'), l => `label:${l.source.id || l.source}->${l.target.id || l.target}:${l.conditionId}`)
       .join(
         enter => enter.append('text').attr('class', 'link-label').attr('font-family', "'DM Mono', monospace").attr('font-size', '11px').attr('text-anchor', 'middle'),
         update => update, exit => exit.remove()
       );
 
-    nodeSel = nodesGroup.selectAll('g.node').data(visibleNodes, d => d.id).join(
+    nodeSel = nodesGroup.selectAll('g.node').data(nodes, d => d.id).join(
         enter => {
           const grp = enter.append('g').attr('class', 'node'); appendNodeVisuals(grp); grp.call(drag);
           grp.on('click', (e, d) => { e.stopPropagation(); onNodeClick(d); });
@@ -169,7 +162,7 @@ function initGraph(data) {
         update => update, exit => exit.remove()
       );
 
-    sim.nodes(visibleNodes); sim.force('link').links(visibleLinks); sim.alpha(0.3).restart();
+    sim.nodes(nodes); sim.force('link').links(links); sim.alpha(0.3).restart();
     const currentK = d3.zoomTransform(svgEl.node()).k; rescaleText(currentK);
     updateLinkColors();
   }
@@ -223,8 +216,11 @@ function initGraph(data) {
 
   function updateNodeScores() {
     if (!nodeSel) return;
-    nodeSel.selectAll('.score-ring').transition().duration(500).attr('stroke-dasharray', d => { const circ = 2 * Math.PI * GRAPH_CONFIG.nodeRadius; return `${(d.score || 0) * circ} ${circ}`; });
-    nodeSel.selectAll('.node-score').text(d => (d.score || 0).toFixed(2));
+    nodeSel.selectAll('.score-ring').transition().duration(500).attr('stroke-dasharray', d => { 
+      const circ = 2 * Math.PI * GRAPH_CONFIG.nodeRadius; 
+      return d.cat === 'state' ? '0 1' : `${(d.score || 0) * circ} ${circ}`; 
+    });
+    nodeSel.selectAll('.node-score').text(d => d.cat === 'state' ? (d.value * 100).toFixed(0) + '%' : (d.score || 0).toFixed(2));
     updateLinkColors();
     const currentK = d3.zoomTransform(svgEl.node()).k; rescaleText(currentK);
   }

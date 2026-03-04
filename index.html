@@ -118,6 +118,7 @@
         <div class="legend-item"><div class="legend-dot" style="background:var(--action)"></div>Action</div>
         <div class="legend-item"><div class="legend-dot" style="background:var(--env)"></div>Environmental beliefs</div>
         <div class="legend-item"><div class="legend-dot" style="background:var(--eco)"></div>Economic beliefs</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--state)"></div>World state</div>
         <div class="legend-attack">
           <div class="attack-line"></div>
           <span>static attack</span>
@@ -139,7 +140,13 @@
           <div class="legend-dot" style="background:#55555522;border:1.5px solid #555555"></div>
           <span>inactive action</span>
         </div>
-        <div class="legend-inactive-hint">Right-click an action node to toggle it inactive (grayed out, excluded from scores).</div>
+        <div class="legend-inactive-hint" style="margin-top:10px; border-top:1px solid var(--border); padding-top:10px;">
+          <strong>World State Logic:</strong><br>
+          Sliders control the "presence" of a state. If a state <em>attacks</em> an argument, that argument's weight is multiplied by (1 - State%).<br>
+          • <strong>100%:</strong> Silences attacked arguments (score 0).<br>
+          • <strong>0%:</strong> Leaves arguments fully active.
+        </div>
+        <div class="legend-inactive-hint" style="margin-top:8px">Right-click an action node to toggle it inactive (grayed out, excluded from scores).</div>
       </div>
 
       <!-- World States Controls -->

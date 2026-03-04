@@ -17,17 +17,6 @@
   ],
   "nodes": [
     {
-      "id": "S1",
-      "label": "Soil\nHumidity",
-      "cat": "state",
-      "value": 0.5,
-      "desc": "Current moisture level in the soil.",
-      "attacks": [],
-      "supports": [],
-      "influences": []
-    },
-    
-    {
       "id": "A1",
       "label": "Arroser \nles fleurs",
       "cat": "action",
@@ -49,27 +38,7 @@
       "cat": "env",
       "score": 0.0,
       "desc": "Fresh water is a precious resource.",
-      "attacks": ["A1", "ECO1"],
-      "supports": [],
-      "influences": []
-    },
-    {
-      "id": "ECO4",
-      "label": "Coute cher a mettre en place",
-      "cat": "eco",
-      "score": 0.0,
-      "desc": "",
-      "attacks": ["STATE1"],
-      "supports": [],
-      "influences": []
-    },
-    {
-      "id": "ECO5",
-      "label": "Rentable au long terme",
-      "cat": "eco",
-      "score": 0.0,
-      "desc": "",
-      "attacks": ["ECO4"],
+      "attacks": ["A1"],
       "supports": [],
       "influences": []
     },
@@ -85,12 +54,13 @@
     },
     {
       "id": "ECO1",
-      "label": "Rendement optimal",
+      "label": "On peut les vendre",
       "cat": "eco",
       "score": 0.0,
       "desc": "",
       "attacks": [],
       "supports": [
+        "ENV5"
       ],
       "influences": []
     },
@@ -110,10 +80,11 @@
     {
       "id": "STATE1",
       "label": "On a deja assez de fleurs \n(%)",
-      "cat": "eco",
-      "score": 0.0,
+      "cat": "state",
+      "value": 0.5,
       "desc": "",
       "attacks": [
+        "ECO1"
       ],
       "supports": [
       ],
@@ -122,8 +93,8 @@
     {
       "id": "STATE2",
       "label": "Le sol est deja humide \n(%)",
-      "cat": "env",
-      "score": 0.0,
+      "cat": "state",
+      "value": 0.5,
       "desc": "",
       "attacks": ["ENV5"],
       "supports": [],
@@ -133,8 +104,8 @@
     {
       "id": "STATE3",
       "label": "Utilisation d'eau de pluie \n(%)",
-      "cat": "env",
-      "score": 0.0,
+      "cat": "state",
+      "value": 0.5,
       "desc": "",
       "attacks": ["ENV1", "ECO2"],
       "supports": [],
