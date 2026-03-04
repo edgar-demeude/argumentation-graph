@@ -52,6 +52,58 @@ function initDetailPanel(gs) {
       }).join('');
   }
 
+  /* ── World States Sliders ─────────────────────────────── */
+  function renderWorldStates() {
+    const container = document.getElementById('world-states-container');
+    if (!container) return;
+
+    const stateNodes = gs.nodes.filter(n => n.cat === 'state');
+    
+    // Simple diffing/rendering
+    container.innerHTML = stateNodes.map(node => `
+      <div class="weight-item" data-node-id="${node.id}">
+        <div class="weight-label">
+          <span>${node.id}: ${node.label.replace('\n', ' ')}</span>
+          <span class="weight-val">${(node.value || 0).toFixed(2)}</span>
+        </div>
+        <input
+          type="range"
+          min="0"
+          max="1"
+          step="0.01"
+          value="${node.value || 0}"
+          class="weight-range"
+          style="accent-color: var(--state)"
+        >
+      </div>
+    `).join('');
+
+    container.querySelectorAll('.weight-item').forEach(item => {
+      const id = item.dataset.nodeId;
+      const node = gs.nodes.find(n => n.id === id);
+      const range = item.querySelector('input');
+      const valLabel = item.querySelector('.weight-val');
+
+      range.addEventListener('input', () => {
+        node.value = parseFloat(range.value);
+        valLabel.textContent = node.value.toFixed(2);
+        recalculate();
+        
+        // Sync with left panel if it's the currently edited node
+        if (gs.fillCreatorForm && gs.editingId === id) {
+           gs.fillCreatorForm(node);
+        }
+      });
+    });
+  }
+
+  // Hook into graph updates to refresh the list of sliders
+  const originalUpdateGraph = gs.updateGraph;
+  gs.updateGraph = function() {
+    originalUpdateGraph.apply(this, arguments);
+    renderWorldStates();
+  };
+
   /* ── Formula rendering (KaTeX) ────────────────────────── */
   function renderFormula() {
     const el = document.getElementById('formula-display');
@@ -86,7 +138,7 @@ function initDetailPanel(gs) {
     }
 
     addBlock('Node score — extended h-categorizer', [
-      { tex: String.raw`\sigma(a) = \frac{1 + \displaystyle\sum_{b\in Sup(a)}\sigma(b)}{2 + \displaystyle\sum_{b\in Att(a)}\sigma(b) + \displaystyle\sum_{b\in Sup(a)}\sigma(b)} \cdot \mu(a)` },
+      { tex: String.raw`\sigma(a) = \frac{1 + \displaystyle\sum_{b\in Sup(a)}\phi(b,a)\sigma(b)}{2 + \displaystyle\sum_{b\in Att(a)}\phi(b,a)\sigma(b) + \displaystyle\sum_{b\in Sup(a)}\phi(b,a)\sigma(b)}` },
       { note: 'Base score: 0.5. Supporters raise σ(a) toward 1; attackers lower it toward 0.' },
     ]);
 
@@ -95,8 +147,8 @@ function initDetailPanel(gs) {
       { note: 'sets of attackers / supporters of a' },
       { tex: String.raw`\sigma(a) \in (0, 1)` },
       { note: 'gradual acceptability score of a' },
-      { tex: String.raw`\mu(a) \in [0, 1]` },
-      { note: 'state activation (product of state links)' },
+      { tex: String.raw`\phi(b,a) \in [0, 1]` },
+      { note: 'link activation: σ(condition) if conditional, else 1' },
     ]);
   }
 
@@ -107,12 +159,21 @@ function initDetailPanel(gs) {
     const nodeSel = gs.getNodeSel();
     const linkSel = gs.getLinkSel();
     if (gs.fillCreatorForm) gs.fillCreatorForm(d);
+    gs.editingId = d.id; // Store current ID for sync
 
     const related = new Set([d.id]);
-    (d.attacks || []).forEach(id => related.add(id));
-    (d.supports || []).forEach(id => related.add(id));
+    (d.attacks || []).forEach(attr => {
+        const targetId = typeof attr === 'string' ? attr : attr.id;
+        related.add(targetId);
+    });
+    (d.supports || []).forEach(attr => {
+        const targetId = typeof attr === 'string' ? attr : attr.id;
+        related.add(targetId);
+    });
     gs.nodes.forEach(n => {
-      if ((n.attacks || []).includes(d.id) || (n.supports || []).includes(d.id)) {
+      const allAttacks = (n.attacks || []).map(a => typeof a === 'string' ? a : a.id);
+      const allSupports = (n.supports || []).map(s => typeof s === 'string' ? s : s.id);
+      if (allAttacks.includes(d.id) || allSupports.includes(d.id)) {
         related.add(n.id);
       }
     });
@@ -131,9 +192,11 @@ function initDetailPanel(gs) {
     linkSel.classed('dimmed',      false);
     linkSel.classed('highlighted', false);
     if (gs.resetCreatorForm) gs.resetCreatorForm();
+    gs.editingId = null;
   }
 
   recalculate();
+  renderWorldStates();
   if (typeof katex !== 'undefined') renderFormula();
   else window.addEventListener('load', renderFormula);
 }

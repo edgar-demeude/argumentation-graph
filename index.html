@@ -56,32 +56,35 @@
 
         <!-- Tags: attacks -->
         <div class="field-group">
-          <label for="arg-attacks-input">
-            Attacks
-            <span class="field-hint">(IDs this argument attacks)</span>
-          </label>
+          <label for="attacks-input">Static Attacks</label>
           <div class="tag-row">
-            <input id="attacks-input" type="text" class="field-input tag-input"
-                   list="attacks-list" placeholder="ID then Enter">
-            <datalist id="attacks-list"></datalist>
+            <input id="attacks-input" type="text" class="field-input tag-input" list="attacks-list" placeholder="Target ID">
             <button id="btn-add-attack" class="tag-add-btn">+</button>
           </div>
           <div class="tags-container attack-tags" id="attacks-tags"></div>
         </div>
 
-        <!-- ── Support relations ─────────────────────────── -->
+        <!-- Tags: supports -->
         <div class="field-group">
-          <label for="arg-supports-input">
-            Supports
-            <span class="field-hint">(IDs this argument supports)</span>
-          </label>
+          <label for="supports-input">Static Supports</label>
           <div class="tag-row">
-            <input id="supports-input" type="text" class="field-input tag-input"
-                   list="supports-list" placeholder="ID then Enter">
-            <datalist id="supports-list"></datalist>
+            <input id="supports-input" type="text" class="field-input tag-input" list="supports-list" placeholder="Target ID">
             <button id="btn-add-support" class="tag-add-btn def">+</button>
           </div>
           <div class="tags-container" id="supports-tags"></div>
+        </div>
+
+        <!-- Tags: influences (Dynamic) -->
+        <div class="field-group">
+          <label for="influences-input">Dynamic Influences</label>
+          <div class="tag-row">
+            <input id="influences-input" type="text" class="field-input tag-input" list="influences-list" placeholder="Target ID">
+            <select id="influences-condition" class="field-input tag-input" style="flex: 0.6;">
+              <option value="">Condition</option>
+            </select>
+            <button id="btn-add-influence" class="tag-add-btn influence" style="color:#ffffff; border-color:#ffffff44; background:rgba(255,255,255,0.1)">+</button>
+          </div>
+          <div class="tags-container" id="influences-tags"></div>
         </div>
 
         <!-- Error message -->
@@ -118,17 +121,34 @@
         <div class="legend-item"><div class="legend-dot" style="background:var(--state)"></div>World state</div>
         <div class="legend-attack">
           <div class="attack-line"></div>
-          <span>attacks</span>
+          <span>static attack</span>
         </div>
         <div class="legend-support">
           <div class="support-line"></div>
-          <span>supports</span>
+          <span>static support</span>
+        </div>
+        <div class="legend-item" style="margin-top:10px; flex-direction:column; align-items:flex-start; gap:4px">
+          <span style="font-size:10px; color:var(--muted)">DYNAMIC INFLUENCE (based on state)</span>
+          <div style="width:100%; height:6px; background: linear-gradient(to right, #e05555, #ffffff, #4caf78); border-radius:3px; margin:4px 0"></div>
+          <div style="display:flex; justify-content:space-between; width:100%; font-size:9px; color:var(--muted)">
+            <span>Attack (0.0)</span>
+            <span>Neutral (0.5)</span>
+            <span>Support (1.0)</span>
+          </div>
         </div>
         <div class="legend-item" style="margin-top:8px">
           <div class="legend-dot" style="background:#55555522;border:1.5px solid #555555"></div>
           <span>inactive action</span>
         </div>
         <div class="legend-inactive-hint">Right-click an action node to toggle it inactive (grayed out, excluded from scores).</div>
+      </div>
+
+      <!-- World States Controls -->
+      <div id="world-states-section" class="weight-section">
+        <h2>World States</h2>
+        <div id="world-states-container" class="weights-container">
+          <!-- Populated by ui.js -->
+        </div>
       </div>
 
       <!-- Score method + formula -->

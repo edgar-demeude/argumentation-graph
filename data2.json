@@ -21,18 +21,10 @@
       "label": "Soil\nHumidity",
       "cat": "state",
       "value": 0.5,
-      "desc": "Current moisture level in the soil. High humidity means the soil is already saturated. It is then a bad thing to do nothing, and a good thing to water the plants.",
-      "attacks": ["A2"],
-      "supports": ["A1"]
-    },
-    {
-        "id": "S2",
-        "label": "Insect\nInfestation",
-        "cat": "state",
-        "value": 0.5,
-        "desc": "The presence of insects that feed on plants can significantly reduce their health and productivity.",
-        "attacks": ["A2"],
-        "supports": ["A3"]
+      "desc": "Current moisture level in the soil.",
+      "attacks": [],
+      "supports": [],
+      "influences": []
     },
     
     {
@@ -40,27 +32,24 @@
       "label": "Water \nthe plants",
       "cat": "action",
       "score": 0.0,
-      "desc": "Use tap water to maintain hydration. Essential for growth but impacts the water table and operational costs.",
-      "attacks": ["ENV1", "ECO2"],
-      "supports": ["ENV2", "ECO1"]
+      "desc": "Use tap water to maintain hydration.",
+      "attacks": ["ECO2", "ENV1"],
+      "supports": ["ENV2", "ECO1"],
+      "influences": [
+        { "id": "ENV2", "conditionId": "!S1" }
+      ]
     },
     {
       "id": "A2",
       "label": "Do nothing",
       "cat": "action",
       "score": 0.0,
-      "desc": "Wait and observe. Saves all immediate resources but risks plant wilting and loss of potential income.",
-      "attacks": ["ENV2", "ECO1"],
-      "supports": ["ENV1", "ECO2"]
-    },
-    {
-      "id": "A3",
-      "label": "Utilize chemical \nfertilizers",
-      "cat": "action",
-      "score": 0.0,
-      "desc": "Use chemical fertilizers to boost plant growth. May have negative environmental impacts.",
-      "attacks": ["ECO2", "ENV3"],
-      "supports": ["ENV2", "ECO1"]
+      "desc": "Wait and observe.",
+      "attacks": ["ECO1"],
+      "supports": ["ENV1", "ECO2"],
+      "influences": [
+        { "id": "ENV2", "conditionId": "S1" }
+      ]
     },
 
     {
@@ -68,46 +57,41 @@
       "label": "Water\nConservation",
       "cat": "env",
       "score": 0.0,
-      "desc": "Fresh water is a precious resource. Avoiding unnecessary usage is key to long-term environmental sustainability.",
+      "desc": "Fresh water is a precious resource.",
       "attacks": [],
-      "supports": []
+      "supports": [],
+      "influences": []
     },
     {
       "id": "ENV2",
       "label": "Plant\nVitality",
       "cat": "env",
       "score": 0.0,
-      "desc": "Living organisms have a right to thrive. Allowing plants to die is a failure of the gardener's ecological duty.",
+      "desc": "Living organisms have a right to thrive.",
       "attacks": [],
-      "supports": []
-    },
-    {
-        "id": "ENV3",
-        "label": "Soil & Water\nHealth",
-        "cat": "env",
-        "score": 0.0,
-        "desc": "Chemical fertilizers can lead to soil degradation and water pollution, harming local ecosystems.",
-        "attacks": [],
-        "supports": []
+      "supports": [],
+      "influences": []
     },
 
     {
       "id": "ECO1",
-      "label": "Maximize\nProduction",
+      "label": "Maximize\nRevenue",
       "cat": "eco",
       "score": 0.0,
-      "desc": "Selling healthy flowers is the only way to sustain the business and allow for future investments.",
+      "desc": "Selling healthy flowers is the only way to sustain the business.",
       "attacks": [],
-      "supports": []
+      "supports": [],
+      "influences": []
     },
     {
       "id": "ECO2",
       "label": "Minimize\nCosts",
       "cat": "eco",
       "score": 0.0,
-      "desc": "Profit is Revenue minus Costs. Keeping utility bills low is essential for a high profit margin.",
+      "desc": "Utility bills should be kept low.",
       "attacks": [],
-      "supports": []
+      "supports": [],
+      "influences": []
     }
   ]
 }

@@ -811,18 +811,20 @@ h2 {
 .link-support {
   stroke: #4caf78;
   stroke-width: 1.5px;
-  stroke-dasharray: 6 3;
   fill: none;
   opacity: 0.75;
 }
 .link-support.highlighted {
   stroke: #6ee89a;
   stroke-width: 2.5px;
-  stroke-dasharray: 6 3;
   opacity: 1;
   marker-end: url(#arrow-support-hi);
 }
 .link-support.dimmed { opacity: 0.2; }
+
+.link-conditional {
+  stroke-dasharray: 4 3;
+}
 
 .link-inactive {
   stroke: #5555559c !important;
@@ -850,8 +852,11 @@ h2 {
 .support-line {
   width: 28px;
   height: 0;
-  border-top: 2px dashed #4caf78;
+  border-top: 2px solid #4caf78;
   position: relative;
+}
+.support-line.dotted {
+  border-top: 2px dotted #4caf78;
 }
 .support-line::after {
   content: '';
@@ -865,6 +870,9 @@ h2 {
   height: 0;
   border-top: 2px solid #e05555;
   position: relative;
+}
+.attack-line.dotted {
+  border-top: 2px dotted #e05555;
 }
 .attack-line::after {
   content: '';
