@@ -152,7 +152,7 @@ function calculateHCategorizer(nodes, categoryWeights = {}) {
       // The node's own intrinsic weight is also scaled by its state multiplier
       const nodeMultiplier = stateMultipliers[n.id];
       const base = (1 + supportSum);
-      const div  = (1 + attackSum + supportSum);
+      const div  = (2 + attackSum + supportSum);
       nextScores[n.id] = (base / div) * nodeMultiplier;
 
       const diff = Math.abs(nextScores[n.id] - currentScores[n.id]);
