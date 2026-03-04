@@ -813,6 +813,7 @@ h2 {
   stroke-width: 1.5px;
   fill: none;
   opacity: 0.75;
+  stroke-dasharray: 4 3;
 }
 .link-support.highlighted {
   stroke: #6ee89a;
@@ -829,6 +830,11 @@ h2 {
 .link-inactive {
   stroke: #5555559c !important;
   stroke-opacity: 0.4;
+}
+
+.link-label-inactive {
+  fill: #5555559c !important;
+  opacity: 0.6;
 }
 
 /* Inactive nodes */

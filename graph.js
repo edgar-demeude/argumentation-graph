@@ -100,7 +100,7 @@ function initGraph(data) {
   const nodesGroup = g.append('g').attr('class', 'nodes-group');
 
   /* ── Force simulation ─────────────────────────────────── */
-  const sim = d3.forceSimulation(nodes)
+  const sim = d3.forceSimulation(nodes.filter(n => n.cat !== 'state'))
     .force('link', d3.forceLink(links).id(d => d.id).distance(GRAPH_CONFIG.linkDistance).strength(GRAPH_CONFIG.linkStrength))
     .force('charge', d3.forceManyBody().strength(GRAPH_CONFIG.chargeStrength))
     .force('center', d3.forceCenter(width / 2, height / 2))
@@ -128,22 +128,38 @@ function initGraph(data) {
   /* ── Color Interpolation ── */
   const colorInterp = d3.interpolateRgbBasis(['#e05555', '#ffffff', '#4caf78']);
 
+  // Gradient markers for influence arrowheads
+  for (let i = 0; i <= 20; i++) {
+    const t = i / 20;
+    defs.append('marker')
+      .attr('id', `arrow-grad-${i}`).attr('viewBox', '0 -5 12 10').attr('refX', GRAPH_CONFIG.nodeRadius + 10).attr('refY', 0)
+      .attr('markerUnits', 'userSpaceOnUse').attr('markerWidth', 12).attr('markerHeight', 10).attr('orient', 'auto')
+      .append('path').attr('d', 'M0,-4L10,0L0,4').attr('fill', colorInterp(t));
+  }
+
   let linkSel, linkLabelSel, nodeSel;
 
   function updateGraph() {
-    linkSel = linksGroup.selectAll('path.link').data(links, l => `${l.type}:${typeof l.source === 'object' ? l.source.id : l.source}->${typeof l.target === 'object' ? l.target.id : l.target}:${l.conditionId || ''}`)
+    const visibleNodes = nodes.filter(n => n.cat !== 'state');
+    const visibleLinks = links.filter(l => {
+        const s = typeof l.source === 'object' ? l.source.id : l.source;
+        const t = typeof l.target === 'object' ? l.target.id : l.target;
+        return visibleNodes.find(n => n.id === s) && visibleNodes.find(n => n.id === t);
+    });
+
+    linkSel = linksGroup.selectAll('path.link').data(visibleLinks, l => `${l.type}:${typeof l.source === 'object' ? l.source.id : l.source}->${typeof l.target === 'object' ? l.target.id : l.target}:${l.conditionId || ''}`)
       .join(
         enter => enter.append('path').attr('class', l => `link link-${l.type}`),
         update => update, exit => exit.remove()
       );
 
-    linkLabelSel = linksGroup.selectAll('text.link-label').data(links.filter(l => l.type === 'influence'), l => `label:${l.source.id || l.source}->${l.target.id || l.target}:${l.conditionId}`)
+    linkLabelSel = linksGroup.selectAll('text.link-label').data(visibleLinks.filter(l => l.type === 'influence'), l => `label:${l.source.id || l.source}->${l.target.id || l.target}:${l.conditionId}`)
       .join(
         enter => enter.append('text').attr('class', 'link-label').attr('font-family', "'DM Mono', monospace").attr('font-size', '11px').attr('text-anchor', 'middle'),
         update => update, exit => exit.remove()
       );
 
-    nodeSel = nodesGroup.selectAll('g.node').data(nodes, d => d.id).join(
+    nodeSel = nodesGroup.selectAll('g.node').data(visibleNodes, d => d.id).join(
         enter => {
           const grp = enter.append('g').attr('class', 'node'); appendNodeVisuals(grp); grp.call(drag);
           grp.on('click', (e, d) => { e.stopPropagation(); onNodeClick(d); });
@@ -153,7 +169,7 @@ function initGraph(data) {
         update => update, exit => exit.remove()
       );
 
-    sim.nodes(nodes); sim.force('link').links(links); sim.alpha(0.3).restart();
+    sim.nodes(visibleNodes); sim.force('link').links(visibleLinks); sim.alpha(0.3).restart();
     const currentK = d3.zoomTransform(svgEl.node()).k; rescaleText(currentK);
     updateLinkColors();
   }
@@ -162,6 +178,12 @@ function initGraph(data) {
     if (!linkSel) return;
     linkSel.each(function(l) {
       const el = d3.select(this);
+
+      if (l.source.inactive) {
+        el.style('stroke', null).attr('marker-end', 'url(#arrow-inactive)');
+        return;
+      }
+
       if (l.type === 'influence') {
         const isInv = l.conditionId.startsWith('!');
         const actualId = isInv ? l.conditionId.substring(1) : l.conditionId;
@@ -170,10 +192,11 @@ function initGraph(data) {
         
         const effectiveVal = isInv ? (1 - stateVal) : stateVal;
         const color = colorInterp(effectiveVal);
+        const gradIdx = Math.round(effectiveVal * 20);
         
-        el.style('stroke', color).attr('marker-end', effectiveVal > 0.6 ? 'url(#arrow-support)' : (effectiveVal < 0.4 ? 'url(#arrow-attack)' : 'url(#arrow-neutral)'));
+        el.style('stroke', color).attr('marker-end', `url(#arrow-grad-${gradIdx})`);
       } else {
-        el.attr('marker-end', l.type === 'support' ? 'url(#arrow-support)' : 'url(#arrow-attack)');
+        el.style('stroke', null).attr('marker-end', l.type === 'support' ? 'url(#arrow-support)' : 'url(#arrow-attack)');
       }
     });
 
@@ -186,7 +209,12 @@ function initGraph(data) {
         const effectiveVal = isInv ? (1 - stateVal) : stateVal;
         
         const labelText = isInv ? `NOT ${actualId}` : l.conditionId;
-        d3.select(this).attr('fill', colorInterp(effectiveVal)).text(labelText);
+        const el = d3.select(this);
+        if (l.source.inactive) {
+          el.attr('fill', null).text(labelText);
+        } else {
+          el.attr('fill', colorInterp(effectiveVal)).text(labelText);
+        }
       });
     }
   }
@@ -221,7 +249,14 @@ function initGraph(data) {
     nodeSel.selectAll('.score-ring').attr('stroke', d => d.inactive ? '#555555' : data.colors[d.cat]);
     nodeSel.selectAll('.node-score').attr('fill', d => d.inactive ? '#555555' : data.colors[d.cat]);
     nodeSel.selectAll('.node-id').attr('fill', d => d.inactive ? '#555555' : data.colors[d.cat]);
-    if (linkSel) { linkSel.classed('link-inactive', l => l.source.inactive).attr('marker-end', l => l.source.inactive ? 'url(#arrow-inactive)' : (l.type === 'support' ? 'url(#arrow-support)' : 'url(#arrow-attack)')); }
+    
+    if (linkSel) { 
+      linkSel.classed('link-inactive', l => l.source.inactive); 
+    }
+    if (linkLabelSel) {
+      linkLabelSel.classed('link-label-inactive', l => l.source.inactive);
+    }
+    updateLinkColors();
     const currentK = d3.zoomTransform(svgEl.node()).k; rescaleText(currentK);
   }
 
