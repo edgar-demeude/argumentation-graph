@@ -178,8 +178,10 @@ function initGraph(data) {
     if (!linkSel) return;
     linkSel.each(function(l) {
       const el = d3.select(this);
+      const isSourceInactive = l.source.inactive;
+      const isTargetInactive = typeof l.target === 'object' ? l.target.inactive : nodes.find(n => n.id === l.target)?.inactive;
 
-      if (l.source.inactive) {
+      if (isSourceInactive || isTargetInactive) {
         el.style('stroke', null).attr('marker-end', 'url(#arrow-inactive)');
         return;
       }
@@ -251,10 +253,18 @@ function initGraph(data) {
     nodeSel.selectAll('.node-id').attr('fill', d => d.inactive ? '#555555' : data.colors[d.cat]);
     
     if (linkSel) { 
-      linkSel.classed('link-inactive', l => l.source.inactive); 
+      linkSel.classed('link-inactive', l => {
+        const isSourceInactive = l.source.inactive;
+        const isTargetInactive = typeof l.target === 'object' ? l.target.inactive : nodes.find(n => n.id === l.target)?.inactive;
+        return isSourceInactive || isTargetInactive;
+      }); 
     }
     if (linkLabelSel) {
-      linkLabelSel.classed('link-label-inactive', l => l.source.inactive);
+      linkLabelSel.classed('link-label-inactive', l => {
+        const isSourceInactive = l.source.inactive;
+        const isTargetInactive = typeof l.target === 'object' ? l.target.inactive : nodes.find(n => n.id === l.target)?.inactive;
+        return isSourceInactive || isTargetInactive;
+      });
     }
     updateLinkColors();
     const currentK = d3.zoomTransform(svgEl.node()).k; rescaleText(currentK);

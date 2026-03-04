@@ -5,7 +5,7 @@
    Load order in index.html: graph.js → ui.js → creator.js → main.js
    ============================================================ */
 
-fetch('data4.json')
+fetch('data3.json')
 // fetch('data2.json')
   .then(res => {
     if (!res.ok) throw new Error(`Failed to load data.json (${res.status})`);

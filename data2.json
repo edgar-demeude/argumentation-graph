@@ -51,10 +51,21 @@
         { "id": "ENV2", "conditionId": "S1" }
       ]
     },
+    {
+      "id": "A3",
+      "label": "Use\nFertilizer",
+      "cat": "action",
+      "score": 0.0,
+      "desc": "Apply chemical fertilizer to boost growth.",
+      "attacks": ["ENV2", "ECO2"],
+      "supports": ["ECO1"],
+      "influences": [
+      ]
+    },
 
     {
       "id": "ENV1",
-      "label": "Water\nConservation",
+      "label": "We should use \nless water",
       "cat": "env",
       "score": 0.0,
       "desc": "Fresh water is a precious resource.",
@@ -64,7 +75,7 @@
     },
     {
       "id": "ENV2",
-      "label": "Plant\nVitality",
+      "label": "Plant & Soil\nQuality",
       "cat": "env",
       "score": 0.0,
       "desc": "Living organisms have a right to thrive.",
