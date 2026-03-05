@@ -76,7 +76,7 @@ export function calculateMaxBased(nodes, categoryWeights, stateMultipliers, acti
       });
 
       const nodeMultiplier = stateMultipliers[n.id];
-      nextScores[n.id] = ((1 + maxSupport) / (2 + maxAttack + maxSupport)) * nodeMultiplier;
+      nextScores[n.id] = ((1 + maxSupport) / (1 + maxAttack + maxSupport)) * nodeMultiplier;
 
       const diff = Math.abs(nextScores[n.id] - currentScores[n.id]);
       if (diff > maxDiff) maxDiff = diff;

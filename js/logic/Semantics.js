@@ -22,10 +22,20 @@ export function calculateSemantics(nodes, method = SEMANTICS_METHODS.HCATEGORIZE
 
   nodes.filter(n => n.cat === 'state').forEach(stateNode => {
     const val = stateNode.value || 0;
+    
+    // Attacks from state: multiplier = (1 - val)
     (stateNode.attacks || []).forEach(targetId => {
       const tid = typeof targetId === 'string' ? targetId : targetId.id;
       if (stateMultipliers[tid] !== undefined) {
         stateMultipliers[tid] *= (1 - val);
+      }
+    });
+
+    // Supports from state: multiplier = val
+    (stateNode.supports || []).forEach(targetId => {
+      const tid = typeof targetId === 'string' ? targetId : targetId.id;
+      if (stateMultipliers[tid] !== undefined) {
+        stateMultipliers[tid] *= val;
       }
     });
   });

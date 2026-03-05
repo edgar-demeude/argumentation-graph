@@ -74,7 +74,7 @@ export function calculateHCategorizer(nodes, categoryWeights, stateMultipliers, 
       });
 
       const nodeMultiplier = stateMultipliers[n.id];
-      nextScores[n.id] = ((1 + supportSum) / (2 + attackSum + supportSum)) * nodeMultiplier;
+      nextScores[n.id] = ((1 + supportSum) / (1 + attackSum + supportSum)) * nodeMultiplier;
 
       const diff = Math.abs(nextScores[n.id] - currentScores[n.id]);
       if (diff > maxDiff) maxDiff = diff;

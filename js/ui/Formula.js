@@ -32,13 +32,13 @@ export class Formula {
 
     if (method === 'max-based') {
       this.addBlock('Node score — adapted Max-based', [
-        { tex: String.raw`\sigma(a) = \frac{1 + \displaystyle\max_{b\in Sup(a)}\phi(b,a)\sigma(b)}{2 + \displaystyle\max_{b\in Att(a)}\phi(b,a)\sigma(b) + \displaystyle\max_{b\in Sup(a)}\phi(b,a)\sigma(b)}` },
+        { tex: String.raw`\sigma(a) = \frac{1 + \displaystyle\max_{b\in Sup(a)}\phi(b,a)\sigma(b)}{1 + \displaystyle\max_{b\in Att(a)}\phi(b,a)\sigma(b) + \displaystyle\max_{b\in Sup(a)}\phi(b,a)\sigma(b)}` },
         { note: 'Favors the quality of strongest attacker/supporter over their number.' },
       ]);
     } else {
       this.addBlock('Node score — extended h-categorizer', [
-        { tex: String.raw`\sigma(a) = \frac{1 + \displaystyle\sum_{b\in Sup(a)}\phi(b,a)\sigma(b)}{2 + \displaystyle\sum_{b\in Att(a)}\phi(b,a)\sigma(b) + \displaystyle\sum_{b\in Sup(a)}\phi(b,a)\sigma(b)}` },
-        { note: 'Base score: 0.5. Supporters raise σ(a) toward 1; attackers lower it toward 0.' },
+        { tex: String.raw`\sigma(a) = \frac{1 + \displaystyle\sum_{b\in Sup(a)}\phi(b,a)\sigma(b)}{1 + \displaystyle\sum_{b\in Att(a)}\phi(b,a)\sigma(b) + \displaystyle\sum_{b\in Sup(a)}\phi(b,a)\sigma(b)}` },
+        { note: 'Base score: 1.0. Supporters raise σ(a) toward 1; attackers lower it toward 0.' },
       ]);
     }
 

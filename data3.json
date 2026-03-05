@@ -22,45 +22,16 @@
       "cat": "action",
       "score": 0.0,
       "desc": "Use tap water to maintain hydration.",
-      "attacks": [],
+      "attacks": ["ENV1", "ECO2"],
       "supports": []
     },
-
-    {
-      "id": "STATE2",
-      "label": "Soil \nmoisture (%)",
-      "cat": "state",
-      "value": 0.5,
-      "desc": "Recent rain has dampened the earth.",
-      "attacks": [],
-      "supports": ["ENV3"]
-    },
-    {
-      "id": "STATE3",
-      "label": "Rainwater \nusage (%)",
-      "cat": "state",
-      "value": 0.5,
-      "desc": "A barrel collects rain for irrigation.",
-      "attacks": [],
-      "supports": ["ENV2"]
-    },
-
     {
       "id": "ENV1",
       "label": "Resource \nloss",
       "cat": "env",
       "score": 0.0,
       "desc": "Fresh water is a precious resource.",
-      "attacks": ["A1"],
-      "supports": []
-    },
-    {
-      "id": "ENV3",
-      "label": "Not if soil \nalready moist",
-      "cat": "env",
-      "score": 0.0,
-      "desc": "Recent rain has dampened the earth.",
-      "attacks": ["ENV5"],
+      "attacks": [],
       "supports": []
     },
     {
@@ -70,7 +41,16 @@
       "score": 0.0,
       "desc": "Plants need water to survive.",
       "attacks": [],
-      "supports": ["A1"]
+      "supports": []
+    },
+    {
+      "id": "ECO1",
+      "label": "Profit from \nsales",
+      "cat": "eco",
+      "score": 0.0,
+      "desc": "Healthy flowers can be sold.",
+      "attacks": [],
+      "supports": []
     },
     {
       "id": "ECO2",
@@ -78,16 +58,34 @@
       "cat": "eco",
       "score": 0.0,
       "desc": "Using tap water increases costs.",
-      "attacks": ["A1"],
+      "attacks": [],
       "supports": []
     },
     {
-      "id": "ENV2",
-      "label": "Not if using \nrainwater",
-      "cat": "env",
+      "id": "STATE1",
+      "label": "Abundant \nflowers (%)",
+      "cat": "state",
+      "value": 0.5,
+      "desc": "The garden is already full.",
+      "attacks": [],
+      "supports": []
+    },
+    {
+      "id": "STATE2",
+      "label": "Soil is \nmoist (%)",
+      "cat": "state",
+      "value": 0.5,
+      "desc": "Recent rain has dampened the earth.",
+      "attacks": [],
+      "supports": []
+    },
+    {
+      "id": "STATE3",
+      "label": "Using \nrainwater (%)",
+      "cat": "state",
       "value": 0.5,
       "desc": "A barrel collects rain for irrigation.",
-      "attacks": ["ENV1", "ECO2"],
+      "attacks": [],
       "supports": []
     }
   ]
