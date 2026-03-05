@@ -2,10 +2,20 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Argumentation Graph — Ecological Gardening Ethics</title>
+  
+  <!-- External Dependencies -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Mono:wght@300;400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Mono:wght@300;400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  
+  <!-- Styles -->
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -18,15 +28,13 @@
 
   <div class="workspace">
 
-    <!-- Left sidebar: creator form -->
+    <!-- Left sidebar: Argument Creator -->
     <aside class="sidebar sidebar-left">
-
       <div class="panel-header">
-        <h2>New argument</h2>
+        <h2>Argument Editor</h2>
       </div>
 
       <div class="creator-form" id="creator-form">
-
         <!-- ID -->
         <div class="field-group">
           <label for="new-id">ID</label>
@@ -43,7 +51,7 @@
         <div class="field-group">
           <label for="new-cat">Category</label>
           <select id="new-cat" class="field-input field-select">
-            <!-- Populated by creator.js -->
+            <!-- Populated by Creator.js -->
           </select>
         </div>
 
@@ -54,35 +62,38 @@
                     placeholder="Ethical justification, context…"></textarea>
         </div>
 
-        <!-- Tags: attacks -->
+        <!-- Static Attacks -->
         <div class="field-group">
           <label for="attacks-input">Static Attacks</label>
           <div class="tag-row">
             <input id="attacks-input" type="text" class="field-input tag-input" list="attacks-list" placeholder="Target ID">
+            <datalist id="attacks-list"></datalist>
             <button id="btn-add-attack" class="tag-add-btn">+</button>
           </div>
           <div class="tags-container attack-tags" id="attacks-tags"></div>
         </div>
 
-        <!-- Tags: supports -->
+        <!-- Static Supports -->
         <div class="field-group">
           <label for="supports-input">Static Supports</label>
           <div class="tag-row">
             <input id="supports-input" type="text" class="field-input tag-input" list="supports-list" placeholder="Target ID">
+            <datalist id="supports-list"></datalist>
             <button id="btn-add-support" class="tag-add-btn def">+</button>
           </div>
           <div class="tags-container" id="supports-tags"></div>
         </div>
 
-        <!-- Tags: influences (Dynamic) -->
+        <!-- Dynamic Influences -->
         <div class="field-group">
           <label for="influences-input">Dynamic Influences</label>
           <div class="tag-row">
             <input id="influences-input" type="text" class="field-input tag-input" list="influences-list" placeholder="Target ID">
+            <datalist id="influences-list"></datalist>
             <select id="influences-condition" class="field-input tag-input" style="flex: 0.6;">
               <option value="">Condition</option>
             </select>
-            <button id="btn-add-influence" class="tag-add-btn influence" style="color:#ffffff; border-color:#ffffff44; background:rgba(255,255,255,0.1)">+</button>
+            <button id="btn-add-influence" class="tag-add-btn" style="color:#ffffff; border-color:#ffffff44; background:rgba(255,255,255,0.1)">+</button>
           </div>
           <div class="tags-container" id="influences-tags"></div>
         </div>
@@ -90,43 +101,41 @@
         <!-- Error message -->
         <div class="form-error" id="form-error"></div>
 
-        <!-- Buttons: single in create mode, dual in edit mode -->
+        <!-- Buttons -->
         <div class="form-btn-row" id="form-btn-row">
           <button id="btn-create" class="create-btn form-btn-create">Create argument</button>
           <button id="btn-delete" class="delete-btn form-btn-delete" data-confirm="false">Delete argument</button>
         </div>
-
       </div>
     </aside>
 
-    <!-- ════════════════════════════════════════════════════
-         CENTRE — D3 graph canvas
-         ════════════════════════════════════════════════════ -->
-    <div id="graph-container">
+    <!-- Centre — D3 Graph Canvas -->
+    <main id="graph-container">
       <svg id="svg"></svg>
-      <div class="instructions">click = details · right-click action = toggle active · drag = move · scroll = zoom</div>
-    </div>
+      <div class="instructions">
+        CLICK: Select node · RIGHT-CLICK: Toggle active · DRAG: Move · SCROLL: Zoom
+      </div>
+    </main>
 
-    <!-- ════════════════════════════════════════════════════
-         RIGHT PANEL — Detail & scores
-         ════════════════════════════════════════════════════ -->
-    <div class="sidebar sidebar-right">
-
+    <!-- Right sidebar: Metrics & Details -->
+    <aside class="sidebar sidebar-right">
       <!-- Legend -->
-      <div class="legend">
-        <h2>Ethical dimensions</h2>
+      <section class="legend">
+        <h2>Ethical Dimensions</h2>
         <div class="legend-item"><div class="legend-dot" style="background:var(--action)"></div>Action</div>
-        <div class="legend-item"><div class="legend-dot" style="background:var(--env)"></div>Environmental beliefs</div>
-        <div class="legend-item"><div class="legend-dot" style="background:var(--eco)"></div>Economic beliefs</div>
-        <div class="legend-item"><div class="legend-dot" style="background:var(--state)"></div>World state</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--env)"></div>Environmental Beliefs</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--eco)"></div>Economic Beliefs</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--state)"></div>World State</div>
+        
         <div class="legend-attack">
           <div class="attack-line"></div>
-          <span>static attack</span>
+          <span>Static Attack</span>
         </div>
         <div class="legend-support">
           <div class="support-line dotted"></div>
-          <span>static support</span>
+          <span>Static Support</span>
         </div>
+        
         <div class="legend-item" style="margin-top:10px; flex-direction:column; align-items:flex-start; gap:4px">
           <span style="font-size:10px; color:var(--muted)">DYNAMIC INFLUENCE (based on state)</span>
           <div style="width:100%; height:6px; background: linear-gradient(to right, #e05555, #ffffff, #4caf78); border-radius:3px; margin:4px 0"></div>
@@ -136,59 +145,42 @@
             <span>Support (1.0)</span>
           </div>
         </div>
-        <div class="legend-item" style="margin-top:8px">
-          <div class="legend-dot" style="background:#55555522;border:1.5px solid #555555"></div>
-          <span>inactive action</span>
+        
+        <div class="legend-inactive-hint">
+          Right-click a node to toggle it inactive (excluded from scores).
+          World State sliders control the "presence" of a state. 
         </div>
-        <div class="legend-inactive-hint" style="margin-top:10px; border-top:1px solid var(--border); padding-top:10px;">
-          <strong>World State Logic:</strong><br>
-          Sliders control the "presence" of a state. If a state <em>attacks</em> an argument, that argument's weight is multiplied by (1 - State%).<br>
-          • <strong>100%:</strong> Silences attacked arguments (score 0).<br>
-          • <strong>0%:</strong> Leaves arguments fully active.
-        </div>
-        <div class="legend-inactive-hint" style="margin-top:8px">Right-click an action node to toggle it inactive (grayed out, excluded from scores).</div>
-      </div>
+      </section>
 
       <!-- World States Controls -->
-      <div id="world-states-section" class="weight-section">
+      <section id="world-states-section" class="weight-section">
         <h2>World States</h2>
         <div id="world-states-container" class="weights-container">
-          <!-- Populated by ui.js -->
+          <!-- Populated by Sidebar.js -->
         </div>
-      </div>
+      </section>
 
-      <!-- Score method + formula -->
-      <div class="detail-panel">
+      <!-- Semantics Info -->
+      <section class="detail-panel">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-          <h2>Score method</h2>
+          <h2>Score Method</h2>
           <select id="semantics-method" class="method-select">
             <option value="h-categorizer">h-categorizer</option>
           </select>
         </div>
         <div id="formula-display" class="formula-display"></div>
-      </div>
+      </section>
 
-      <!-- Global scores footer — value beliefs only -->
-      <div class="score-section">
-        <h2>Value belief scores (avg)</h2>
+      <!-- Global Scores -->
+      <footer class="score-section">
+        <h2>Category Scores (Average)</h2>
         <div class="global-scores" id="global-scores"></div>
-
-        <div class="final-score-box">
-          <button id="start-simulation-btn" class="create-btn">
-            Start Simulation
-          </button>
-        </div>
-      </div>
-
-    </div>
+      </footer>
+    </aside>
   </div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
-  <script src="semantics.js"></script>
-  <script src="graph.js"></script>
-  <script src="ui.js"></script>
-  <script src="creator.js"></script>
-  <script src="main.js"></script>
+  <!-- Entry Point -->
+  <script type="module" src="js/main.js"></script>
 
 </body>
 </html>

@@ -1,48 +1,49 @@
-# 🍃 Argumentation graph - Ecological gardening
+# 🌿 Argumentation Graph — Ecological Gardening Ethics
 
-*A concise web-based argumentation visualization and analysis tool that models argument graphs, evaluates semantics, and provides an interactive UI for exploring argument structures.*
+A modular, interactive web application for modeling and analyzing ethical argumentation graphs using gradual semantics. This tool allows users to visualize how different actions, beliefs, and world states interact to produce ethical scores based on the **weighted H-Categorizer** algorithm.
 
----
+## 🚀 Features
 
-## Key Features
+- **Interactive D3 Graph**: Visualize arguments as nodes and their relationships (attacks, supports, influences) as edges.
+- **Gradual Semantics**: Real-time calculation of node scores (0.0 to 1.0) using an iterative fixed-point algorithm.
+- **Dynamic Influences**: Model conditional relationships that change based on the "World State" (e.g., how drought affects the value of watering).
+- **Argument Editor**: Create, update, and delete nodes and relationships directly from the UI.
+- **Export/Import**: Save your graph configuration as a JSON file for later use.
+- **Mathematical Transparency**: View the underlying formulas (rendered via KaTeX) used for score calculations.
 
-- Lightweight client-side app for building and visualizing argumentation graphs.
-- Multiple semantics evaluation for argument acceptability.
-- Interactive UI with graph manipulation and inspection.
-- Simple JSON data-driven project structure.
+## 🛠️ Architecture
 
----
+The project is built with a modern modular structure (ES Modules):
 
-## Quick Start
+- **Logic Layer**: Centralized state management and semantic algorithms (`js/logic/`).
+- **Rendering Layer**: Specialized D3.js components for graph visualization (`js/graph/`).
+- **UI Layer**: Modular sidebar and form components (`js/ui/`).
+- **Configuration**: Application-wide constants and styling variables (`js/utils/Constants.js`).
 
-**Requirements:** modern web browser (Chrome, Firefox, Edge).
+## 📖 How to Use
 
-1. Open `index.html` in your browser.
-2. Edit or add argument data in `data.json`, then reload the page to view updates.
+1.  **Select a Node**: Click on any node to see its details and highlight its relationships.
+2.  **Toggle Active**: Right-click a node to deactivate it (it will be grayed out and excluded from score calculations).
+3.  **Adjust World State**: Use the sliders in the right panel to change the intensity of different states.
+4.  **Edit Graph**: Use the left panel to add new arguments or modify existing ones.
+5.  **Export**: Click "Export JSON" to download your current graph state.
 
----
+## 🖥️ Local Development
 
-## Usage
+Since the application uses ES Modules and fetches data from a JSON file, it must be served via a web server (it won't work by simply opening `index.html` in a browser due to CORS policies).
 
-- Use the UI to add, remove, or edit arguments and relations.
-- Visualizations update automatically based on data and selected semantics.
-- Core logic is found in:
-  - `graph.js` — graph model and rendering utilities.
-  - `semantics.js` — argumentation semantics implementations.
-  - `ui.js` — user interaction logic.
+**Option 1: Python**
+```bash
+python -m http.server 8000
+```
 
----
+**Option 2: Node.js (serve)**
+```bash
+npx serve .
+```
 
-## Project Structure
+Then visit `http://localhost:8000`.
 
-| File            | Description                              |
-|-----------------|------------------------------------------|
-| `index.html`    | Main entry and UI layout.                |
-| `main.js`       | App initialization and creation helpers. |
-| `creator.js`    | Creation helpers.                        |
-| `graph.js`      | Graph model and rendering utilities.     |
-| `semantics.js`  | Argumentation semantics implementations.  |
-| `ui.js`         | User interaction logic.                 |
-| `styles.css`    | Visual styling.                          |
-| `data.json`     | Primary data file for arguments.         |
-| `data_old.json` | Previous data snapshot.                  |
+## 📜 Credits
+
+Developed as part of a research project on argumentation-based ethical reasoning in ecological contexts. Built with [D3.js](https://d3js.org/) and [KaTeX](https://katex.org/).

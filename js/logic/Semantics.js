@@ -1,15 +1,18 @@
-/* ============================================================
-   semantics.js — Gradual semantics calculation
-   ============================================================ */
+/**
+ * @fileoverview Logic for calculating gradual semantics in the argumentation graph.
+ */
 
-const SEMANTICS_METHODS = {
-  HCATEGORIZER: 'h-categorizer',
-};
+import { SEMANTICS_METHODS } from '../utils/Constants.js';
 
 /**
- * Calculates gradual scores for all nodes in the graph.
+ * Calculates gradual scores for all nodes.
+ * 
+ * @param {Array<Object>} nodes - List of graph nodes.
+ * @param {string} method - The semantics method to use.
+ * @param {Object} categoryWeights - Weights per category.
+ * @returns {Object} A map of node IDs to their gradual scores.
  */
-function calculateSemantics(nodes, method = SEMANTICS_METHODS.HCATEGORIZER, categoryWeights = {}) {
+export function calculateSemantics(nodes, method = SEMANTICS_METHODS.HCATEGORIZER, categoryWeights = {}) {
   if (method === SEMANTICS_METHODS.HCATEGORIZER) {
     return calculateHCategorizer(nodes, categoryWeights);
   }
@@ -19,24 +22,21 @@ function calculateSemantics(nodes, method = SEMANTICS_METHODS.HCATEGORIZER, cate
 /**
  * Extended weighted h-categorizer with support relations and dynamic influences.
  *
- * MODIFICATION FOR DYNAMIC INFLUENCES:
- * 1. Links can be static (attacks/supports) or dynamic (influences).
- * 2. influence(B, A) conditioned by S:
- *    impact = (2 * σ(S) - 1) * σ(B)
- *    if impact > 0 -> contributes to supportSum
- *    if impact < 0 -> contributes to attackSum
+ * @param {Array<Object>} nodes 
+ * @param {Object} categoryWeights 
+ * @returns {Object} Node ID -> Score mapping.
  */
 function calculateHCategorizer(nodes, categoryWeights = {}) {
   const maxIterations = 100;
   const epsilon = 1e-6;
 
-  // 1. Pre-calculate state multipliers for all nodes
+  // 1. Pre-calculate state multipliers for all nodes.
+  // A state can "attack" a node to reduce its strength (e.g. drought makes plants weak).
   const stateMultipliers = {};
   nodes.forEach(n => { stateMultipliers[n.id] = 1.0; });
 
   nodes.filter(n => n.cat === 'state').forEach(stateNode => {
     const val = stateNode.value || 0;
-    // If a state attacks a node, that node's strength is (1 - stateValue)
     (stateNode.attacks || []).forEach(targetId => {
       const tid = typeof targetId === 'string' ? targetId : targetId.id;
       if (stateMultipliers[tid] !== undefined) {
@@ -45,18 +45,18 @@ function calculateHCategorizer(nodes, categoryWeights = {}) {
     });
   });
 
-  // 2. Identify active nodes
-  // A node is active if it's not manually inactive AND its state multiplier is > 0
+  // 2. Identify active nodes.
+  // A node is active if not manually toggled off and its state multiplier is > 0.
   const activeNodes = nodes.filter(n => {
     if (n.cat === 'state') return true;
     return !n.inactive && stateMultipliers[n.id] > 0;
   });
   const activeIds = new Set(activeNodes.map(n => n.id));
 
-  const catOf = {};
-  activeNodes.forEach(n => { catOf[n.id] = n.cat; });
+  const nodeCats = {};
+  activeNodes.forEach(n => { nodeCats[n.id] = n.cat; });
 
-  // 3. Build reverse maps
+  // 3. Build reverse relationship maps for efficient calculation.
   const attackedBy = {};
   const supportedBy = {};
   const influencedBy = {};
@@ -70,37 +70,38 @@ function calculateHCategorizer(nodes, categoryWeights = {}) {
   activeNodes.forEach(n => {
     const multiplier = stateMultipliers[n.id];
     
-    // Static attacks
     (n.attacks || []).forEach(targetId => {
       const tid = typeof targetId === 'string' ? targetId : targetId.id;
       if (activeIds.has(tid)) {
         attackedBy[tid].push({ srcId: n.id, multiplier });
       }
     });
-    // Static supports
+
     (n.supports || []).forEach(targetId => {
       const tid = typeof targetId === 'string' ? targetId : targetId.id;
       if (activeIds.has(tid)) {
         supportedBy[tid].push({ srcId: n.id, multiplier });
       }
     });
-    // Dynamic influences
+
     (n.influences || []).forEach(attr => {
-      const targetId = attr.id;
-      const conditionId = attr.conditionId;
-      if (activeIds.has(targetId)) {
-        influencedBy[targetId].push({ srcId: n.id, conditionId, multiplier });
+      if (activeIds.has(attr.id)) {
+        influencedBy[attr.id].push({ 
+          srcId: n.id, 
+          conditionId: attr.conditionId, 
+          multiplier 
+        });
       }
     });
   });
 
-  // 4. Initial scores
+  // 4. Initialize scores.
   let currentScores = {};
   activeNodes.forEach(n => {
     currentScores[n.id] = (n.cat === 'state') ? (n.value || 0) : 0.5;
   });
 
-  // 5. Iterative calculation
+  // 5. Fixed-point iteration.
   for (let iter = 0; iter < maxIterations; iter++) {
     const nextScores = {};
     let maxDiff = 0;
@@ -116,44 +117,44 @@ function calculateHCategorizer(nodes, categoryWeights = {}) {
 
       // Static Attackers
       (attackedBy[n.id] || []).forEach(({ srcId, multiplier }) => {
-        const w = (categoryWeights[catOf[srcId]] || 1.0) * multiplier;
-        attackSum += w * (currentScores[srcId] || 0);
+        const weight = (categoryWeights[nodeCats[srcId]] || 1.0) * multiplier;
+        attackSum += weight * (currentScores[srcId] || 0);
       });
 
       // Static Supporters
       (supportedBy[n.id] || []).forEach(({ srcId, multiplier }) => {
-        const w = (categoryWeights[catOf[srcId]] || 1.0) * multiplier;
-        supportSum += w * (currentScores[srcId] || 0);
+        const weight = (categoryWeights[nodeCats[srcId]] || 1.0) * multiplier;
+        supportSum += weight * (currentScores[srcId] || 0);
       });
 
-      // Dynamic Influences
+      // Dynamic Influences (Conditional on world state)
       (influencedBy[n.id] || []).forEach(({ srcId, conditionId, multiplier }) => {
-        const w = (categoryWeights[catOf[srcId]] || 1.0) * multiplier;
+        const weight = (categoryWeights[nodeCats[srcId]] || 1.0) * multiplier;
         const srcScore = currentScores[srcId] || 0;
         
         let impact = 0;
         if (conditionId) {
           const isInverse = conditionId.startsWith('!');
-          const actualStateId = isInverse ? conditionId.substring(1) : conditionId;
+          const stateId = isInverse ? conditionId.substring(1) : conditionId;
+          const stateNode = nodes.find(sn => sn.id === stateId);
           
-          const stateNode = nodes.find(sn => sn.id === actualStateId);
           if (stateNode) {
             const stateVal = stateNode.value || 0;
-            const multiplierCond = isInverse ? (1 - 2 * stateVal) : (2 * stateVal - 1);
-            impact = multiplierCond * srcScore;
+            const activationMultiplier = isInverse ? (1 - 2 * stateVal) : (2 * stateVal - 1);
+            impact = activationMultiplier * srcScore;
           }
         }
         
-        if (impact > 0) supportSum += w * impact;
-        else if (impact < 0) attackSum += w * Math.abs(impact);
+        if (impact > 0) supportSum += weight * impact;
+        else if (impact < 0) attackSum += weight * Math.abs(impact);
       });
 
-      // Base h-categorizer formula
-      // The node's own intrinsic weight is also scaled by its state multiplier
+      // Base h-categorizer formula:
+      // σ(a) = (1 + Σ supporters) / (2 + Σ attackers + Σ supporters)
       const nodeMultiplier = stateMultipliers[n.id];
-      const base = (1 + supportSum);
-      const div  = (2 + attackSum + supportSum);
-      nextScores[n.id] = (base / div) * nodeMultiplier;
+      const base = 1 + supportSum;
+      const divisor = 2 + attackSum + supportSum;
+      nextScores[n.id] = (base / divisor) * nodeMultiplier;
 
       const diff = Math.abs(nextScores[n.id] - currentScores[n.id]);
       if (diff > maxDiff) maxDiff = diff;
@@ -163,24 +164,30 @@ function calculateHCategorizer(nodes, categoryWeights = {}) {
     if (maxDiff < epsilon) break;
   }
 
-  // Set score 0 for inactive nodes
+  // Set scores for inactive nodes to zero.
   nodes.forEach(n => {
-    if (n.cat !== 'state' && (!activeIds.has(n.id))) currentScores[n.id] = 0;
+    if (n.cat !== 'state' && !activeIds.has(n.id)) {
+      currentScores[n.id] = 0;
+    }
   });
 
   return currentScores;
 }
 
 /**
- * Aggregates scores by category (excluding action and state).
+ * Aggregates scores by category (mean score).
+ * 
+ * @param {Array<Object>} nodes 
+ * @returns {Object} Category -> Mean Score mapping.
  */
-function aggregateScores(nodes, categoryWeights = {}) {
+export function aggregateScores(nodes) {
   const categoryData = {};
+  
   nodes
     .filter(n => !n.inactive && n.cat !== 'action' && n.cat !== 'state')
     .forEach(n => {
       if (!categoryData[n.cat]) categoryData[n.cat] = { sum: 0, count: 0 };
-      categoryData[n.cat].sum   += n.score;
+      categoryData[n.cat].sum += n.score;
       categoryData[n.cat].count += 1;
     });
 

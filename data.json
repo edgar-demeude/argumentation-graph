@@ -2,12 +2,14 @@
   "colors": {
     "action": "#9b8fd4",
     "env": "#4caf78",
-    "eco": "#dca450"
+    "eco": "#dca450",
+    "state": "#4ab3f4"
   },
   "cats": {
     "action": "Gardening Actions",
     "env": "Environmental Health",
-    "eco": "Economic Prosperity"
+    "eco": "Economic Prosperity",
+    "state": "World State"
   },
   "globalScores": [
     { "label": "Eco-Balance", "cat": "env", "value": 0.0 },
@@ -16,120 +18,83 @@
   "nodes": [
     {
       "id": "A1",
-      "label": "Synthetic\nFertilizer",
+      "label": "Water the \nflowers",
       "cat": "action",
       "score": 0.0,
-      "desc": "Industrial NPK for fast growth. It provides quick results but ignores long-term soil life.",
-      "attacks": ["ENV2"],
-      "supports": ["ECO1"]
-    },
-    {
-      "id": "A2",
-      "label": "Drip\nIrrigation",
-      "cat": "action",
-      "score": 0.0,
-      "desc": "Automated precise watering. Great for saving water but requires an expensive initial setup.",
-      "attacks": ["ECO2"],
-      "supports": ["ENV1", "ECO1"]
-    },
-    {
-      "id": "A3",
-      "label": "Organic\nCompost",
-      "cat": "action",
-      "score": 0.0,
-      "desc": "Natural waste recycling. Excellent for the soil, though it requires significant time and physical effort.",
-      "attacks": ["ECO3"],
-      "supports": ["ENV2"]
-    },
-    {
-      "id": "A4",
-      "label": "Beneficial\nInsects",
-      "cat": "action",
-      "score": 0.0,
-      "desc": "Using ladybugs and bees to control pests naturally without any toxic chemicals.",
-      "attacks": ["ECO2"],
-      "supports": ["ENV3", "ENV4"]
-    },
-    {
-      "id": "A5",
-      "label": "Chemical\nPesticides",
-      "cat": "action",
-      "score": 0.0,
-      "desc": "Strong chemicals to kill pests. Very effective for the harvest but dangerous for bees and water.",
-      "attacks": ["ENV1", "ENV3"],
-      "supports": ["ECO1"]
+      "desc": "Use tap water to maintain hydration.",
+      "attacks": [],
+      "supports": [],
+      "influences": []
     },
     {
       "id": "ENV1",
-      "label": "Water\nSafety",
+      "label": "Resource \nloss",
       "cat": "env",
       "score": 0.0,
-      "desc": "Keeping groundwater clean and available. Crucial for the future of the garden and the planet.",
-      "attacks": [],
-      "supports": ["ENV2"]
+      "desc": "Fresh water is a precious resource.",
+      "attacks": ["A1"],
+      "supports": [],
+      "influences": []
     },
     {
-      "id": "ENV2",
-      "label": "Soil\nVitality",
+      "id": "ENV5",
+      "label": "Vital for \nhealth",
       "cat": "env",
       "score": 0.0,
-      "desc": "A healthy soil full of microorganisms. The foundation of any sustainable food production.",
+      "desc": "Plants need water to survive.",
       "attacks": [],
-      "supports": ["ENV4", "ECO1"]
-    },
-    {
-      "id": "ENV3",
-      "label": "Pollinator\nHealth",
-      "cat": "env",
-      "score": 0.0,
-      "desc": "Protecting bees and butterflies. They are necessary for the reproduction of most plants.",
-      "attacks": [],
-      "supports": ["ECO1"]
-    },
-    {
-      "id": "ENV4",
-      "label": "Biodiversity",
-      "cat": "env",
-      "score": 0.0,
-      "desc": "A rich ecosystem with many species. It makes the garden more resilient to diseases.",
-      "attacks": [],
-      "supports": []
+      "supports": ["A1"],
+      "influences": []
     },
     {
       "id": "ECO1",
-      "label": "Harvest\nYield",
+      "label": "Profit from \nsales",
       "cat": "eco",
       "score": 0.0,
-      "desc": "The total amount of food produced. High yield ensures the garden is productive and useful.",
-      "attacks": ["ENV1"],
-      "supports": ["ECO4"]
+      "desc": "Healthy flowers can be sold.",
+      "attacks": [],
+      "supports": ["ENV5"],
+      "influences": []
     },
     {
       "id": "ECO2",
-      "label": "Low\nStartup Cost",
+      "label": "Water is \nexpensive",
       "cat": "eco",
       "score": 0.0,
-      "desc": "Keeping initial costs low to avoid debt and financial stress at the beginning.",
-      "attacks": [],
-      "supports": []
+      "desc": "Using tap water increases costs.",
+      "attacks": ["A1"],
+      "supports": [],
+      "influences": []
     },
     {
-      "id": "ECO3",
-      "label": "Time\nEfficiency",
-      "cat": "eco",
-      "score": 0.0,
-      "desc": "Optimizing working hours. Important for gardeners who have other professional activities.",
-      "attacks": [],
-      "supports": []
+      "id": "STATE1",
+      "label": "Abundant \nflowers (%)",
+      "cat": "state",
+      "value": 0.5,
+      "desc": "The garden is already full.",
+      "attacks": ["ECO1"],
+      "supports": [],
+      "influences": []
     },
     {
-      "id": "ECO4",
-      "label": "Local\nEconomy",
-      "cat": "eco",
-      "score": 0.0,
-      "desc": "Contributing to the community wealth by sharing or selling fresh local food.",
-      "attacks": [],
-      "supports": []
+      "id": "STATE2",
+      "label": "Soil is \nmoist (%)",
+      "cat": "state",
+      "value": 0.5,
+      "desc": "Recent rain has dampened the earth.",
+      "attacks": ["ENV5"],
+      "supports": [],
+      "influences": []
+    },
+    {
+      "id": "STATE3",
+      "label": "Using \nrainwater (%)",
+      "cat": "state",
+      "value": 0.5,
+      "desc": "A barrel collects rain for irrigation.",
+      "attacks": ["ENV1", "ECO2"],
+      "supports": [],
+      "influences": []
     }
   ]
 }
