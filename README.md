@@ -1,4 +1,4 @@
-# 🌿 Argumentation Graph — Ecological Gardening Ethics
+# ⚖️ Argumentation graph — Values alignment
 
 A modular, interactive web application for modeling and analyzing ethical argumentation graphs using gradual semantics. This tool allows users to visualize how different actions, beliefs, and world states interact to produce ethical scores based on the **weighted H-Categorizer** algorithm.
 
