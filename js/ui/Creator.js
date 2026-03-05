@@ -24,12 +24,9 @@ export class Creator {
 
     this.attacksInput = document.getElementById('attacks-input');
     this.supportsInput = document.getElementById('supports-input');
-    this.influencesInput = document.getElementById('influences-input');
-    this.influencesCondition = document.getElementById('influences-condition');
     
     this.attacksTagsContainer = document.getElementById('attacks-tags');
     this.supportsTagsContainer = document.getElementById('supports-tags');
-    this.influencesTagsContainer = document.getElementById('influences-tags');
     
     this.btnCreate = document.getElementById('btn-create');
     this.btnDelete = document.getElementById('btn-delete');
@@ -38,7 +35,6 @@ export class Creator {
 
     this.attacksTags = [];
     this.supportsTags = [];
-    this.influencesTags = [];
 
     this.init();
   }
@@ -98,177 +94,142 @@ export class Creator {
       if (this.editingId) this.liveUpdate();
     });
 
-    // Tag management
-    document.getElementById('btn-add-attack').addEventListener('click', () => this.addTag('attack'));
-    document.getElementById('btn-add-support').addEventListener('click', () => this.addTag('support'));
-    document.getElementById('btn-add-influence').addEventListener('click', () => this.addTag('influence'));
-
-    this.btnCreate.addEventListener('click', () => this.handleCreate());
-    this.btnDelete.addEventListener('click', () => this.handleDelete());
-  }
-
-  toggleValueVisibility() {
-    this.valueInputGroup.style.display = (this.selectCat.value === 'state') ? 'block' : 'none';
-  }
-
-  generateNextId() {
-    const ids = this.state.nodes.map(n => parseInt(n.id.replace(/\D/g, ''), 10)).filter(n => !isNaN(n));
-    return `A${(ids.length ? Math.max(...ids) : 0) + 1}`;
-  }
-
-  reset() {
-    this.editingId = null;
-    this.attacksTags = [];
-    this.supportsTags = [];
-    this.influencesTags = [];
-    this.inputLabel.value = '';
-    this.textaDesc.value = '';
-    this.inputValue.value = '0.5';
-    this.inputValueLabel.textContent = '0.50';
-    this.inputId.value = this.generateNextId();
-    this.toggleValueVisibility();
-    this.renderAllTags();
-    this.setMode('create');
-    this.updateDatalists();
-  }
-
-  fill(node) {
-    this.editingId = node.id;
-    this.inputId.value = node.id;
-    this.inputLabel.value = node.label.replace(/\n/g, '\\n');
-    this.selectCat.value = node.cat;
-    this.textaDesc.value = node.desc || '';
+        // Tag management
+        document.getElementById('btn-add-attack').addEventListener('click', () => this.addTag('attack'));
+        document.getElementById('btn-add-support').addEventListener('click', () => this.addTag('support'));
     
-    if (node.value !== undefined) {
-      this.inputValue.value = node.value;
-      this.inputValueLabel.textContent = parseFloat(node.value).toFixed(2);
-    }
+        this.btnCreate.addEventListener('click', () => this.handleCreate());
+        this.btnDelete.addEventListener('click', () => this.handleDelete());
+      }
     
-    this.attacksTags = [...(node.attacks || [])];
-    this.supportsTags = [...(node.supports || [])];
-    this.influencesTags = [...(node.influences || [])];
-
-    this.toggleValueVisibility();
-    this.renderAllTags();
-    this.setMode('edit');
-    this.updateDatalists();
-  }
-
-  setMode(mode) {
-    if (mode === 'create') {
-      this.btnRow.classList.remove('edit-mode');
-      if (this.panelTitle) this.panelTitle.textContent = 'New argument';
-      this.btnCreate.style.display = 'block';
-    } else {
-      this.btnRow.classList.add('edit-mode');
-      if (this.panelTitle) this.panelTitle.textContent = 'Update argument';
-      this.btnCreate.style.display = 'none';
-    }
-  }
-
-  updateDatalists() {
-    ['attacks-list', 'supports-list', 'influences-list'].forEach(id => {
-      const dl = document.getElementById(id);
-      if (dl) {
-        dl.innerHTML = '';
-        this.state.nodes.forEach(n => {
-          const opt = document.createElement('option');
-          opt.value = n.id;
-          dl.appendChild(opt);
+      toggleValueVisibility() {
+        this.valueInputGroup.style.display = (this.selectCat.value === 'state') ? 'block' : 'none';
+      }
+    
+      generateNextId() {
+        const ids = this.state.nodes.map(n => parseInt(n.id.replace(/\D/g, ''), 10)).filter(n => !isNaN(n));
+        return `A${(ids.length ? Math.max(...ids) : 0) + 1}`;
+      }
+    
+      reset() {
+        this.editingId = null;
+        this.attacksTags = [];
+        this.supportsTags = [];
+        this.inputLabel.value = '';
+        this.textaDesc.value = '';
+        this.inputValue.value = '0.5';
+        this.inputValueLabel.textContent = '0.50';
+        this.inputId.value = this.generateNextId();
+        this.toggleValueVisibility();
+        this.renderAllTags();
+        this.setMode('create');
+        this.updateDatalists();
+      }
+    
+      fill(node) {
+        this.editingId = node.id;
+        this.inputId.value = node.id;
+        this.inputLabel.value = node.label.replace(/\n/g, '\\n');
+        this.selectCat.value = node.cat;
+        this.textaDesc.value = node.desc || '';
+        
+        if (node.value !== undefined) {
+          this.inputValue.value = node.value;
+          this.inputValueLabel.textContent = parseFloat(node.value).toFixed(2);
+        }
+        
+        this.attacksTags = [...(node.attacks || [])];
+        this.supportsTags = [...(node.supports || [])];
+    
+        this.toggleValueVisibility();
+        this.renderAllTags();
+        this.setMode('edit');
+        this.updateDatalists();
+      }
+    
+      setMode(mode) {
+        if (mode === 'create') {
+          this.btnRow.classList.remove('edit-mode');
+          if (this.panelTitle) this.panelTitle.textContent = 'New argument';
+          this.btnCreate.style.display = 'block';
+        } else {
+          this.btnRow.classList.add('edit-mode');
+          if (this.panelTitle) this.panelTitle.textContent = 'Update argument';
+          this.btnCreate.style.display = 'none';
+        }
+      }
+    
+      updateDatalists() {
+        ['attacks-list', 'supports-list'].forEach(id => {
+          const dl = document.getElementById(id);
+          if (dl) {
+            dl.innerHTML = '';
+            this.state.nodes.forEach(n => {
+              const opt = document.createElement('option');
+              opt.value = n.id;
+              dl.appendChild(opt);
+            });
+          }
         });
       }
-    });
-
-    if (this.influencesCondition) {
-      const current = this.influencesCondition.value;
-      this.influencesCondition.innerHTML = '<option value="">Condition</option>';
-            this.state.nodes.filter(n => n.cat === 'state').forEach(n => {
-              const lbl = n.label.replace('\n', ' ');
-              const opt = document.createElement('option');
-        opt.value = n.id; opt.textContent = `if ${n.id} (${lbl})`;
-        this.influencesCondition.appendChild(opt);
-        const optInv = document.createElement('option');
-        optInv.value = `!${n.id}`; optInv.textContent = `if NOT ${n.id} (not ${lbl})`;
-        this.influencesCondition.appendChild(optInv);
-      });
-      this.influencesCondition.value = current;
-    }
-  }
-
-  addTag(type) {
-    if (type === 'attack') {
-      const val = this.attacksInput.value.trim().toUpperCase();
-      if (val && !this.attacksTags.includes(val)) this.attacksTags.push(val);
-      this.attacksInput.value = '';
-    } else if (type === 'support') {
-      const val = this.supportsInput.value.trim().toUpperCase();
-      if (val && !this.supportsTags.includes(val)) this.supportsTags.push(val);
-      this.supportsInput.value = '';
-    } else if (type === 'influence') {
-      const id = this.influencesInput.value.trim().toUpperCase();
-      const cond = this.influencesCondition.value;
-      if (!id || !cond) { alert('Select both target and condition.'); return; }
-      if (!this.influencesTags.some(x => x.id === id && x.conditionId === cond)) {
-        this.influencesTags.push({ id, conditionId: cond });
+    
+      addTag(type) {
+        if (type === 'attack') {
+          const val = this.attacksInput.value.trim().toUpperCase();
+          if (val && !this.attacksTags.includes(val)) this.attacksTags.push(val);
+          this.attacksInput.value = '';
+        } else if (type === 'support') {
+          const val = this.supportsInput.value.trim().toUpperCase();
+          if (val && !this.supportsTags.includes(val)) this.supportsTags.push(val);
+          this.supportsInput.value = '';
+        }
+        this.renderAllTags();
+        if (this.editingId) this.liveUpdate();
       }
-      this.influencesInput.value = '';
-      this.influencesCondition.value = '';
-    }
-    this.renderAllTags();
-    if (this.editingId) this.liveUpdate();
-  }
-
-  renderAllTags() {
-    const render = (arr, container, color) => {
-      container.innerHTML = arr.map(item => {
-        const id = typeof item === 'string' ? item : item.id;
-        const cond = typeof item === 'object' ? item.conditionId : null;
-        let lbl = id;
-        if (cond) lbl += ` [if ${cond.startsWith('!') ? 'NOT ' + cond.substring(1) : cond}]`;
-        return `
-          <span class="creator-tag" style="border-color:${color}44; color:${color}">
-            ${lbl}
-            <button class="tag-remove" data-id="${id}" data-cond="${cond || ''}" style="color:${color}">×</button>
-          </span>
-        `;
-      }).join('');
-
-      container.querySelectorAll('.tag-remove').forEach(btn => {
-        btn.onclick = () => {
-          const id = btn.dataset.id;
-          const cond = btn.dataset.cond;
-          if (container === this.attacksTagsContainer) this.attacksTags = this.attacksTags.filter(x => x !== id);
-          else if (container === this.supportsTagsContainer) this.supportsTags = this.supportsTags.filter(x => x !== id);
-          else this.influencesTags = this.influencesTags.filter(x => !(x.id === id && x.conditionId === (cond || null)));
-          this.renderAllTags();
-          if (this.editingId) this.liveUpdate();
+    
+      renderAllTags() {
+        const render = (arr, container, color) => {
+          container.innerHTML = arr.map(item => {
+            const id = typeof item === 'string' ? item : item.id;
+            return `
+              <span class="creator-tag" style="border-color:${color}44; color:${color}">
+                ${id}
+                <button class="tag-remove" data-id="${id}" style="color:${color}">×</button>
+              </span>
+            `;
+          }).join('');
+    
+          container.querySelectorAll('.tag-remove').forEach(btn => {
+            btn.onclick = () => {
+              const id = btn.dataset.id;
+              if (container === this.attacksTagsContainer) this.attacksTags = this.attacksTags.filter(x => x !== id);
+              else if (container === this.supportsTagsContainer) this.supportsTags = this.supportsTags.filter(x => x !== id);
+              this.renderAllTags();
+              if (this.editingId) this.liveUpdate();
+            };
+          });
         };
-      });
-    };
-
-    render(this.attacksTags, this.attacksTagsContainer, '#e07777');
-    render(this.supportsTags, this.supportsTagsContainer, '#4caf78');
-    render(this.influencesTags, this.influencesTagsContainer, '#ffffff');
-  }
-
-  collectData() {
-    const id = this.inputId.value.trim();
-    const label = this.inputLabel.value.trim().replace(/\\n/g, '\n');
-    const cat = this.selectCat.value;
-    if (!id || !label) return null;
-
-    return {
-      id,
-      label,
-      cat,
-      desc: this.textaDesc.value.trim(),
-      value: cat === 'state' ? parseFloat(this.inputValue.value) : undefined,
-      attacks: [...this.attacksTags],
-      supports: [...this.supportsTags],
-      influences: [...this.influencesTags]
-    };
-  }
-
+    
+        render(this.attacksTags, this.attacksTagsContainer, '#e07777');
+        render(this.supportsTags, this.supportsTagsContainer, '#4caf78');
+      }
+    
+      collectData() {
+        const id = this.inputId.value.trim();
+        const label = this.inputLabel.value.trim().replace(/\\n/g, '\n');
+        const cat = this.selectCat.value;
+        if (!id || !label) return null;
+    
+        return {
+          id,
+          label,
+          cat,
+          desc: this.textaDesc.value.trim(),
+          value: cat === 'state' ? parseFloat(this.inputValue.value) : undefined,
+          attacks: [...this.attacksTags],
+          supports: [...this.supportsTags]
+        };
+      }
   liveUpdate() {
     const data = this.collectData();
     if (!data) return;

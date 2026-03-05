@@ -26,6 +26,7 @@ async function init() {
     const sidebar = new Sidebar(state);
     const creator = new Creator(state);
     const formula = new Formula('#formula-display');
+    sidebar.formula = formula;
 
     // 4. Connect renderer and state
     state.onStructureChange = () => renderer.update();

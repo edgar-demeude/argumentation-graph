@@ -29,6 +29,7 @@ export const COLORS = {
 
 export const SEMANTICS_METHODS = {
   HCATEGORIZER: "h-categorizer",
+  MAXBASED: "max-based",
 };
 
 export const DEFAULT_DATA_PATH = "data.json";

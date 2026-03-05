@@ -3,6 +3,7 @@
  */
 
 import { calculateSemantics, aggregateScores } from './Semantics.js';
+import { SEMANTICS_METHODS } from '../utils/Constants.js';
 
 export class GraphState {
   /**
@@ -12,13 +13,13 @@ export class GraphState {
     this.colors = data.colors || {};
     this.cats = data.cats || {};
     this.globalScoresConfig = data.globalScores || [];
+    this.method = SEMANTICS_METHODS.HCATEGORIZER;
     
     // Prepare nodes with some defaults
     this.nodes = (data.nodes || []).map(n => ({
       ...n,
       attacks: [...(n.attacks || [])],
       supports: [...(n.supports || [])],
-      influences: [...(n.influences || [])],
       inactive: n.cat === 'state' ? false : (n.cat === 'action' ? !!n.inactive : !!n.inactive),
       score: n.score || 0,
       value: n.value !== undefined ? n.value : 0.5,
@@ -55,9 +56,6 @@ export class GraphState {
           this.links.push({ source: n.id, target: targetId, type: 'support' });
         }
       });
-      (n.influences || []).forEach(attr => {
-        this.links.push({ source: n.id, target: attr.id, type: 'influence', conditionId: attr.conditionId });
-      });
     });
   }
 
@@ -65,7 +63,7 @@ export class GraphState {
    * Recalculates scores and triggers update.
    */
   recalculate() {
-    const nodeScores = calculateSemantics(this.nodes);
+    const nodeScores = calculateSemantics(this.nodes, this.method);
     this.nodes.forEach(n => {
       n.score = nodeScores[n.id] || 0;
     });
@@ -84,7 +82,6 @@ export class GraphState {
       ...nodeObj,
       attacks: [...(nodeObj.attacks || [])],
       supports: [...(nodeObj.supports || [])],
-      influences: [...(nodeObj.influences || [])],
       score: 0,
     });
     this.rebuildLinks();
@@ -109,15 +106,6 @@ export class GraphState {
         if (n.id === id) return;
         if (n.attacks) n.attacks = n.attacks.map(x => x === id ? newData.id : x);
         if (n.supports) n.supports = n.supports.map(x => x === id ? newData.id : x);
-        if (n.influences) {
-          n.influences = n.influences.map(x => {
-            const copy = { ...x };
-            if (copy.id === id) copy.id = newData.id;
-            if (copy.conditionId === id) copy.conditionId = newData.id;
-            if (copy.conditionId === `!${id}`) copy.conditionId = `!${newData.id}`;
-            return copy;
-          });
-        }
       });
     }
 
@@ -136,9 +124,6 @@ export class GraphState {
     this.nodes.forEach(n => {
       if (n.attacks) n.attacks = n.attacks.filter(x => x !== id);
       if (n.supports) n.supports = n.supports.filter(x => x !== id);
-      if (n.influences) {
-        n.influences = n.influences.filter(x => x.id !== id && x.conditionId !== id && x.conditionId !== `!${id}`);
-      }
     });
     if (this.selectedNodeId === id) this.selectedNodeId = null;
     this.rebuildLinks();
@@ -182,7 +167,6 @@ export class GraphState {
         desc: n.desc,
         attacks: [...(n.attacks || [])],
         supports: [...(n.supports || [])],
-        influences: [...(n.influences || [])],
         value: n.value,
         inactive: n.inactive
       }))

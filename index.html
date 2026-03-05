@@ -84,20 +84,6 @@
           <div class="tags-container" id="supports-tags"></div>
         </div>
 
-        <!-- Dynamic Influences -->
-        <div class="field-group">
-          <label for="influences-input">Dynamic Influences</label>
-          <div class="tag-row">
-            <input id="influences-input" type="text" class="field-input tag-input" list="influences-list" placeholder="Target ID">
-            <datalist id="influences-list"></datalist>
-            <select id="influences-condition" class="field-input tag-input" style="flex: 0.6;">
-              <option value="">Condition</option>
-            </select>
-            <button id="btn-add-influence" class="tag-add-btn" style="color:#ffffff; border-color:#ffffff44; background:rgba(255,255,255,0.1)">+</button>
-          </div>
-          <div class="tags-container" id="influences-tags"></div>
-        </div>
-
         <!-- Error message -->
         <div class="form-error" id="form-error"></div>
 
@@ -136,16 +122,6 @@
           <span>Static Support</span>
         </div>
         
-        <div class="legend-item" style="margin-top:10px; flex-direction:column; align-items:flex-start; gap:4px">
-          <span style="font-size:10px; color:var(--muted)">DYNAMIC INFLUENCE (based on state)</span>
-          <div style="width:100%; height:6px; background: linear-gradient(to right, #e05555, #ffffff, #4caf78); border-radius:3px; margin:4px 0"></div>
-          <div style="display:flex; justify-content:space-between; width:100%; font-size:9px; color:var(--muted)">
-            <span>Attack (0.0)</span>
-            <span>Neutral (0.5)</span>
-            <span>Support (1.0)</span>
-          </div>
-        </div>
-        
         <div class="legend-inactive-hint">
           Right-click a node to toggle it inactive (excluded from scores).
           World State sliders control the "presence" of a state. 
@@ -166,6 +142,7 @@
           <h2>Score Method</h2>
           <select id="semantics-method" class="method-select">
             <option value="h-categorizer">h-categorizer</option>
+            <option value="max-based">max-based</option>
           </select>
         </div>
         <div id="formula-display" class="formula-display"></div>

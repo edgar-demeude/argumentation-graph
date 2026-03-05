@@ -27,18 +27,28 @@ export class Formula {
 
     this.container.innerHTML = '';
 
-    this.addBlock('Node score — extended h-categorizer', [
-      { tex: String.raw`\sigma(a) = \frac{1 + \displaystyle\sum_{b\in Sup(a)}\phi(b,a)\sigma(b)}{2 + \displaystyle\sum_{b\in Att(a)}\phi(b,a)\sigma(b) + \displaystyle\sum_{b\in Sup(a)}\phi(b,a)\sigma(b)}` },
-      { note: 'Base score: 0.5. Supporters raise σ(a) toward 1; attackers lower it toward 0.' },
-    ]);
+    const select = document.getElementById('semantics-method');
+    const method = select ? select.value : 'h-categorizer';
+
+    if (method === 'max-based') {
+      this.addBlock('Node score — adapted Max-based', [
+        { tex: String.raw`\sigma(a) = \frac{1 + \displaystyle\max_{b\in Sup(a)}\phi(b,a)\sigma(b)}{2 + \displaystyle\max_{b\in Att(a)}\phi(b,a)\sigma(b) + \displaystyle\max_{b\in Sup(a)}\phi(b,a)\sigma(b)}` },
+        { note: 'Favors the quality of strongest attacker/supporter over their number.' },
+      ]);
+    } else {
+      this.addBlock('Node score — extended h-categorizer', [
+        { tex: String.raw`\sigma(a) = \frac{1 + \displaystyle\sum_{b\in Sup(a)}\phi(b,a)\sigma(b)}{2 + \displaystyle\sum_{b\in Att(a)}\phi(b,a)\sigma(b) + \displaystyle\sum_{b\in Sup(a)}\phi(b,a)\sigma(b)}` },
+        { note: 'Base score: 0.5. Supporters raise σ(a) toward 1; attackers lower it toward 0.' },
+      ]);
+    }
 
     this.addBlock('Notation', [
       { tex: String.raw`Att(a),\; Sup(a)` },
       { note: 'sets of attackers / supporters of a' },
       { tex: String.raw`\sigma(a) \in (0, 1)` },
       { note: 'gradual acceptability score of a' },
-      { tex: String.raw`\phi(b,a) \in [0, 1]` },
-      { note: 'link activation: σ(condition) if conditional, else 1' },
+      { tex: String.raw`\phi(b,a)` },
+      { note: 'link weight: (category weight) × (state multiplier)' },
     ]);
   }
 

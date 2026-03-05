@@ -58,14 +58,13 @@ export class GraphRenderer {
       lines.attr('y', (_, i) => (i - (n - 1) / 2) * lineGap);
     });
     this.g.selectAll('.node-id').attr('font-size', idSize + 'px')
-      .attr('y', -(GRAPH_CONFIG.nodeRadius + 6) / k);
+      .attr('y', -(GRAPH_CONFIG.nodeRadius + 6 / k));
     this.g.selectAll('.node-score').attr('font-size', scoreSize + 'px')
-      .attr('y', (GRAPH_CONFIG.nodeRadius + 14) / k);
-    this.g.selectAll('.link-label').attr('font-size', (11 / k) + 'px');
+      .attr('y', (GRAPH_CONFIG.nodeRadius + 14 / k));
   }
 
   /**
-   * Initializes arrowhead markers and gradients.
+   * Initializes arrowhead markers.
    */
   initMarkers() {
     const defs = this.svg.append('defs');
@@ -86,20 +85,6 @@ export class GraphRenderer {
         .attr('orient', 'auto')
         .append('path').attr('d', 'M0,-4L10,0L0,4').attr('fill', color);
     });
-
-    // Gradient markers for influence arrowheads
-    const colorInterp = d3.interpolateRgbBasis([COLORS.attack, COLORS.neutral, COLORS.support]);
-    for (let i = 0; i <= 20; i++) {
-      const t = i / 20;
-      defs.append('marker')
-        .attr('id', `arrow-grad-${i}`).attr('viewBox', '0 -5 12 10')
-        .attr('refX', GRAPH_CONFIG.nodeRadius + 10).attr('refY', 0)
-        .attr('markerUnits', 'userSpaceOnUse').attr('markerWidth', 12).attr('markerHeight', 10)
-        .attr('orient', 'auto')
-        .append('path').attr('d', 'M0,-4L10,0L0,4').attr('fill', colorInterp(t));
-    }
-    
-    this.colorInterp = colorInterp;
   }
 
   /**
@@ -124,12 +109,6 @@ export class GraphRenderer {
         const dr = Math.sqrt(dx * dx + dy * dy) * GRAPH_CONFIG.curvature;
         return `M${d.source.x},${d.source.y}A${dr},${dr} 0 0,1 ${d.target.x},${d.target.y}`;
       });
-
-      if (this.linkLabelSel) {
-        this.linkLabelSel
-          .attr('x', d => (d.source.x + d.target.x) / 2)
-          .attr('y', d => (d.source.y + d.target.y) / 2 - 10);
-      }
 
       this.nodeSel.attr('transform', d => `translate(${d.x},${d.y})`);
     });
@@ -173,23 +152,10 @@ export class GraphRenderer {
       .data(this.state.links, l => {
         const s = typeof l.source === 'object' ? l.source.id : l.source;
         const t = typeof l.target === 'object' ? l.target.id : l.target;
-        return `${l.type}:${s}->${t}:${l.conditionId || ''}`;
+        return `${l.type}:${s}->${t}`;
       })
       .join(
         enter => enter.append('path').attr('class', l => `link link-${l.type}`),
-        update => update,
-        exit => exit.remove()
-      );
-
-    this.linkLabelSel = this.linksGroup.selectAll('text.link-label')
-      .data(this.state.links.filter(l => l.type === 'influence'), 
-            l => {
-              const s = typeof l.source === 'object' ? l.source.id : l.source;
-              const t = typeof l.target === 'object' ? l.target.id : l.target;
-              return `label:${s}->${t}:${l.conditionId}`;
-            })
-      .join(
-        enter => enter.append('text').attr('class', 'link-label').attr('text-anchor', 'middle'),
         update => update,
         exit => exit.remove()
       );
@@ -336,43 +302,8 @@ export class GraphRenderer {
       }
       
       el.classed('link-inactive', false);
-
-      if (l.type === 'influence') {
-        const isInv = l.conditionId.startsWith('!');
-        const actualId = isInv ? l.conditionId.substring(1) : l.conditionId;
-        const condNode = this.state.getNode(actualId);
-        const stateVal = condNode ? (condNode.value || 0) : 0.5;
-        const effectiveVal = isInv ? (1 - stateVal) : stateVal;
-        
-        const color = this.colorInterp(effectiveVal);
-        const gradIdx = Math.round(effectiveVal * 20);
-        
-        el.style('stroke', color).attr('marker-end', `url(#arrow-grad-${gradIdx})`);
-      } else {
-        el.style('stroke', null).attr('marker-end', l.type === 'support' ? 'url(#arrow-support)' : 'url(#arrow-attack)');
-      }
+      el.style('stroke', null).attr('marker-end', l.type === 'support' ? 'url(#arrow-support)' : 'url(#arrow-attack)');
     });
-
-    if (this.linkLabelSel) {
-      this.linkLabelSel.each((l, i, nodes) => {
-        const el = d3.select(nodes[i]);
-        const isInv = l.conditionId.startsWith('!');
-        const actualId = isInv ? l.conditionId.substring(1) : l.conditionId;
-        const condNode = this.state.getNode(actualId);
-        const stateVal = condNode ? (condNode.value || 0) : 0.5;
-        const effectiveVal = isInv ? (1 - stateVal) : stateVal;
-        
-        const labelText = isInv ? `NOT ${actualId}` : l.conditionId;
-        const isSourceInactive = l.source.inactive;
-        const isTargetInactive = l.target.inactive;
-
-        if (isSourceInactive || isTargetInactive) {
-          el.attr('fill', null).text(labelText).classed('link-label-inactive', true);
-        } else {
-          el.attr('fill', this.colorInterp(effectiveVal)).text(labelText).classed('link-label-inactive', false);
-        }
-      });
-    }
   }
 
   getRelatedNodeIds(nodeId) {

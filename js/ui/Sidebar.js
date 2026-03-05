@@ -12,6 +12,7 @@ export class Sidebar {
     this.scoresContainer = document.getElementById('global-scores');
     
     this.init();
+    this.setupMethodListener();
   }
 
   init() {
@@ -20,6 +21,20 @@ export class Sidebar {
       this.renderGlobalScores(categoryScores);
       this.renderWorldStates();
     };
+  }
+
+  setupMethodListener() {
+    const select = document.getElementById('semantics-method');
+    if (!select) return;
+
+    select.value = this.state.method;
+    select.addEventListener('change', () => {
+      this.state.method = select.value;
+      this.state.recalculate();
+      
+      // Update formula display
+      if (this.formula) this.formula.render();
+    });
   }
 
   /**
