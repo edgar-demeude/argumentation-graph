@@ -1,12 +1,13 @@
 /**
- * @fileoverview Standard (Fractional) H-Categorizer gradual semantics.
+ * @fileoverview Drastic (Multiplicative) semantics.
  */
 
 /**
- * Standard weighted h-categorizer with support relations.
- * Formula: σ(a) = ((1 + Σ sup) / (1 + Σ att + Σ sup)) * stateMultiplier
+ * Drastic Bipolar Semantics.
+ * Formula: σ(a) = min(1.0, (1 - Σ att) * (1 + Σ sup) * stateMultiplier)
  * 
- * Non-destructive: scores are balanced but attackers don't "destroy" targets.
+ * Attacker at 1.0 kills target.
+ * State is integrated into the clamp (can be compensated by support).
  *
  * @param {Array<Object>} nodes 
  * @param {Object} categoryWeights 
@@ -14,7 +15,7 @@
  * @param {Set<string>} activeIds 
  * @returns {Object} Node ID -> Score mapping.
  */
-export function calculateHCategorizer(nodes, categoryWeights, stateMultipliers, activeIds) {
+export function calculateDrastic(nodes, categoryWeights, stateMultipliers, activeIds) {
   const maxIterations = 100;
   const epsilon = 1e-6;
 
@@ -32,13 +33,8 @@ export function calculateHCategorizer(nodes, categoryWeights, stateMultipliers, 
   nodes.forEach(n => {
     if (!activeIds.has(n.id)) return;
     const multiplier = stateMultipliers[n.id];
-    
-    (n.attacks || []).forEach(tid => {
-      if (activeIds.has(tid)) attackedBy[tid].push({ srcId: n.id, multiplier });
-    });
-    (n.supports || []).forEach(tid => {
-      if (activeIds.has(tid)) supportedBy[tid].push({ srcId: n.id, multiplier });
-    });
+    (n.attacks || []).forEach(tid => { if (activeIds.has(tid)) attackedBy[tid].push({ srcId: n.id, multiplier }); });
+    (n.supports || []).forEach(tid => { if (activeIds.has(tid)) supportedBy[tid].push({ srcId: n.id, multiplier }); });
   });
 
   let currentScores = {};
@@ -67,7 +63,8 @@ export function calculateHCategorizer(nodes, categoryWeights, stateMultipliers, 
       });
 
       const nodeMultiplier = stateMultipliers[n.id];
-      nextScores[n.id] = ((1 + supportSum) / (1 + attackSum + supportSum)) * nodeMultiplier;
+      const raw = (1 - attackSum) * (1 + supportSum) * nodeMultiplier;
+      nextScores[n.id] = Math.min(1.0, Math.max(0, raw));
 
       const diff = Math.abs(nextScores[n.id] - currentScores[n.id]);
       if (diff > maxDiff) maxDiff = diff;

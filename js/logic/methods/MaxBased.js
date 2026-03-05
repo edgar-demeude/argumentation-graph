@@ -1,13 +1,10 @@
 /**
- * @fileoverview Implementation of Max-based gradual semantics.
+ * @fileoverview Standard Max-based gradual semantics (Fractional).
  */
 
 /**
- * Weighted Max-based semantics with support relations.
- * Formula (standard): σ(a) = 1 / (1 + max σ(att))
- * Formula (adapted with supports): σ(a) = (1 + max σ(sup)) / (2 + max σ(att) + max σ(sup))
- * 
- * Favors the quality of attackers/supporters over their number.
+ * Standard Max-based semantics with support relations.
+ * Formula: σ(a) = ((1 + max sup) / (1 + max att + max sup)) * stateMultiplier
  *
  * @param {Array<Object>} nodes 
  * @param {Object} categoryWeights 
@@ -52,14 +49,8 @@ export function calculateMaxBased(nodes, categoryWeights, stateMultipliers, acti
     let maxDiff = 0;
 
     nodes.forEach(n => {
-      if (!activeIds.has(n.id)) {
-        nextScores[n.id] = 0;
-        return;
-      }
-      if (n.cat === 'state') {
-        nextScores[n.id] = n.value || 0;
-        return;
-      }
+      if (!activeIds.has(n.id)) { nextScores[n.id] = 0; return; }
+      if (n.cat === 'state') { nextScores[n.id] = n.value || 0; return; }
 
       let maxAttack = 0;
       let maxSupport = 0;

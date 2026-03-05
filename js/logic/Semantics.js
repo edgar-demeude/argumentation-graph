@@ -5,6 +5,8 @@
 import { SEMANTICS_METHODS } from '../utils/Constants.js';
 import { calculateHCategorizer } from './methods/HCategorizer.js';
 import { calculateMaxBased } from './methods/MaxBased.js';
+import { calculateDrastic } from './methods/Drastic.js';
+import { calculateDrasticLinear } from './methods/DrasticLinear.js';
 
 /**
  * Calculates gradual scores for all nodes using the selected method.
@@ -26,17 +28,13 @@ export function calculateSemantics(nodes, method = SEMANTICS_METHODS.HCATEGORIZE
     // Attacks from state: multiplier = (1 - val)
     (stateNode.attacks || []).forEach(targetId => {
       const tid = typeof targetId === 'string' ? targetId : targetId.id;
-      if (stateMultipliers[tid] !== undefined) {
-        stateMultipliers[tid] *= (1 - val);
-      }
+      if (stateMultipliers[tid] !== undefined) stateMultipliers[tid] *= (1 - val);
     });
 
     // Supports from state: multiplier = val
     (stateNode.supports || []).forEach(targetId => {
       const tid = typeof targetId === 'string' ? targetId : targetId.id;
-      if (stateMultipliers[tid] !== undefined) {
-        stateMultipliers[tid] *= val;
-      }
+      if (stateMultipliers[tid] !== undefined) stateMultipliers[tid] *= val;
     });
   });
 
@@ -49,26 +47,24 @@ export function calculateSemantics(nodes, method = SEMANTICS_METHODS.HCATEGORIZE
   );
 
   // 3. Dispatch to specific method
-  let scores = {};
-  if (method === SEMANTICS_METHODS.MAXBASED) {
-    scores = calculateMaxBased(nodes, categoryWeights, stateMultipliers, activeIds);
-  } else {
-    // Default to h-categorizer
-    scores = calculateHCategorizer(nodes, categoryWeights, stateMultipliers, activeIds);
+  switch (method) {
+    case SEMANTICS_METHODS.MAXBASED:
+      return calculateMaxBased(nodes, categoryWeights, stateMultipliers, activeIds);
+    case SEMANTICS_METHODS.DRASTIC:
+      return calculateDrastic(nodes, categoryWeights, stateMultipliers, activeIds);
+    case SEMANTICS_METHODS.DRASTIC_LINEAR:
+      return calculateDrasticLinear(nodes, categoryWeights, stateMultipliers, activeIds);
+    case SEMANTICS_METHODS.HCATEGORIZER:
+    default:
+      return calculateHCategorizer(nodes, categoryWeights, stateMultipliers, activeIds);
   }
-
-  return scores;
 }
 
 /**
  * Aggregates scores by category (mean score).
- * 
- * @param {Array<Object>} nodes 
- * @returns {Object} Category -> Mean Score mapping.
  */
 export function aggregateScores(nodes) {
   const categoryData = {};
-  
   nodes
     .filter(n => !n.inactive && n.cat !== 'action' && n.cat !== 'state')
     .forEach(n => {
