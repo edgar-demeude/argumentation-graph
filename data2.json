@@ -38,7 +38,7 @@
 
     {
       "id": "ECO1",
-      "label": "Very effective",
+      "label": "Very effective \nagainst pests",
       "cat": "eco",
       "score": 0.0,
       "desc": "Pesticides can effectively control pests.",
@@ -89,6 +89,15 @@
       "score": 0.0,
       "desc": "Careful application can minimize environmental harm.",
       "attacks": ["ENV1"],
+      "supports": []
+    },
+    {
+      "id": "ENV5",
+      "label": "Even then, risks remain",
+      "cat": "env",
+      "score": 0.0,
+      "desc": "Even with careful use, pesticides can still pose risks to the environment.",
+      "attacks": ["ECO4"],
       "supports": []
     },
     {

@@ -18,76 +18,94 @@
   "nodes": [
     {
       "id": "A1",
-      "label": "Water the \nflowers",
+      "label": "Plant seasonal flowers",
       "cat": "action",
       "score": 0.0,
-      "desc": "Use tap water to maintain hydration.",
+      "desc": "Choose flowers that thrive in the current season.",
       "attacks": [],
-      "supports": []
+      "supports": ["ENV1"]
+    },
+    {
+      "id": "A2",
+      "label": "Compost organic waste",
+      "cat": "action",
+      "score": 0.0,
+      "desc": "Transform kitchen scraps into nutrient-rich soil amendment.",
+      "attacks": [],
+      "supports": ["ENV1"]
+    },
+    {
+      "id": "A3",
+      "label": "Use chemical pesticides",
+      "cat": "action",
+      "score": 0.0,
+      "desc": "Apply chemical treatments to control pests.",
+      "attacks": ["ENV2", "ENV1"],
+      "supports": ["ECO1"]
+    },
+    {
+      "id": "A4",
+      "label": "Use drip irrigation",
+      "cat": "action",
+      "score": 0.0,
+      "desc": "Implement a water-efficient irrigation system that delivers water directly to plant roots.",
+      "attacks": ["ECO1"],
+      "supports": ["ENV3"]
     },
 
     {
-      "id": "STATE2",
-      "label": "Soil \nmoisture (%)",
+      "id": "STATE1",
+      "label": "Soil \nhealth (%)",
       "cat": "state",
       "value": 0.5,
-      "desc": "Recent rain has dampened the earth.",
-      "attacks": [],
-      "supports": ["ENV3"]
+      "desc": "A measure of soil quality based on nutrient content and structure.",
+      "attacks": ["ENV1"],
+      "supports": []
     },
     {
-      "id": "STATE3",
-      "label": "Rainwater \nusage (%)",
+      "id": "STATE2",
+      "label": "Water \navailability (%)",
       "cat": "state",
       "value": 0.5,
-      "desc": "A barrel collects rain for irrigation.",
+      "desc": "A measure of water resources available for plant growth.",
       "attacks": [],
-      "supports": ["ENV2"]
+      "supports": ["ENV3"]
     },
 
     {
       "id": "ENV1",
-      "label": "Resource \nloss",
+      "label": "We should protect biodiversity",
       "cat": "env",
       "score": 0.0,
-      "desc": "Fresh water is a precious resource.",
-      "attacks": ["A1"],
-      "supports": []
-    },
-    {
-      "id": "ENV3",
-      "label": "Not if soil \nalready moist",
-      "cat": "env",
-      "score": 0.0,
-      "desc": "Recent rain has dampened the earth.",
-      "attacks": ["ENV5"],
-      "supports": []
-    },
-    {
-      "id": "ENV5",
-      "label": "Vital for \nhealth",
-      "cat": "env",
-      "score": 0.0,
-      "desc": "Plants need water to survive.",
+      "desc": "A diverse ecosystem supports resilience and productivity.",
       "attacks": [],
-      "supports": ["A1"]
-    },
-    {
-      "id": "ECO2",
-      "label": "Water is \nexpensive",
-      "cat": "eco",
-      "score": 0.0,
-      "desc": "Using tap water increases costs.",
-      "attacks": ["A1"],
       "supports": []
     },
     {
       "id": "ENV2",
-      "label": "Not if using \nrainwater",
+      "label": "We should avoid harmful chemicals",
       "cat": "env",
-      "value": 0.5,
-      "desc": "A barrel collects rain for irrigation.",
-      "attacks": ["ENV1", "ECO2"],
+      "score": 0.0,
+      "desc": "Chemical pesticides can harm beneficial insects and contaminate soil.",
+      "attacks": [],
+      "supports": []
+    },
+    { 
+      "id": "ENV3",
+      "label": "We should preserve water",
+      "cat": "env",
+      "score": 0.0,
+      "desc": "Water is a finite resource essential for plant growth.",
+      "attacks": [],
+      "supports": []
+    },
+    {
+      "id": "ECO1",
+      "label": "We should have good productivity",
+      "cat": "eco",
+      "score": 0.0,
+      "desc": "Sustainable farming practices can enhance productivity while minimizing environmental impact.",
+      "attacks": [],
       "supports": []
     }
   ]

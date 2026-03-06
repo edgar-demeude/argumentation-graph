@@ -22,12 +22,13 @@
       "cat": "action",
       "score": 0.0,
       "desc": "Use tap water to maintain hydration.",
-      "attacks": ["ENV1", "ECO2"],
-      "supports": []
+      "attacks": ["ECO2", "ENV1"],
+      "supports": ["ENV5"]
     },
+
     {
       "id": "ENV1",
-      "label": "Resource \nloss",
+      "label": "We should preserve resource",
       "cat": "env",
       "score": 0.0,
       "desc": "Fresh water is a precious resource.",
@@ -36,7 +37,7 @@
     },
     {
       "id": "ENV5",
-      "label": "Vital for \nhealth",
+      "label": "We should have \nhealthy flowers",
       "cat": "env",
       "score": 0.0,
       "desc": "Plants need water to survive.",
@@ -45,16 +46,16 @@
     },
     {
       "id": "ECO1",
-      "label": "Profit from \nsales",
+      "label": "We should grow \nthe most flowers \npossible",
       "cat": "eco",
       "score": 0.0,
-      "desc": "Healthy flowers can be sold.",
+      "desc": "More flowers equals more money.",
       "attacks": [],
-      "supports": []
+      "supports": ["ENV5"]
     },
     {
       "id": "ECO2",
-      "label": "Water is \nexpensive",
+      "label": "We should \nsave money",
       "cat": "eco",
       "score": 0.0,
       "desc": "Using tap water increases costs.",
@@ -63,30 +64,12 @@
     },
     {
       "id": "STATE1",
-      "label": "Abundant \nflowers (%)",
-      "cat": "state",
-      "value": 0.5,
-      "desc": "The garden is already full.",
-      "attacks": [],
-      "supports": []
-    },
-    {
-      "id": "STATE2",
-      "label": "Soil is \nmoist (%)",
-      "cat": "state",
-      "value": 0.5,
-      "desc": "Recent rain has dampened the earth.",
-      "attacks": [],
-      "supports": []
-    },
-    {
-      "id": "STATE3",
-      "label": "Using \nrainwater (%)",
+      "label": "Use \nrainwater",
       "cat": "state",
       "value": 0.5,
       "desc": "A barrel collects rain for irrigation.",
       "attacks": [],
-      "supports": []
+      "supports": ["ENV1"]
     }
   ]
 }
