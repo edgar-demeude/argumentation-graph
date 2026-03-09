@@ -26,7 +26,7 @@ simulation = None
 async def startup_event():
     global graph_state
     # Load initial data
-    data_path = os.path.join(os.path.dirname(__file__), "..", "data.json")
+    data_path = os.path.join(os.path.dirname(__file__), "..", "data-small.json")
     with open(data_path, "r") as f:
         data = json.load(f)
     graph_state = GraphState(data)

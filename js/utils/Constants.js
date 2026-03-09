@@ -38,6 +38,6 @@ export const SEMANTICS_METHODS = {
   MAXBASED: "max-based",
 };
 
-export const DEFAULT_DATA_PATH = "data.json";
+// export const DEFAULT_DATA_PATH = "data.json";
 // export const DEFAULT_DATA_PATH = "data2.json";
-// export const DEFAULT_DATA_PATH = "data-small.json";
+export const DEFAULT_DATA_PATH = "data-small.json";
