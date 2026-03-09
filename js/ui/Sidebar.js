@@ -69,14 +69,14 @@ export class Sidebar {
 
       this.statesContainer.querySelectorAll('.weight-item').forEach(item => {
         const id = item.dataset.nodeId;
-        const node = this.state.getNode(id);
         const range = item.querySelector('input');
         const valLabel = item.querySelector('.weight-val');
 
         range.addEventListener('input', () => {
-          node.value = parseFloat(range.value);
-          valLabel.textContent = node.value.toFixed(2);
-          this.state.recalculate();
+          const val = parseFloat(range.value);
+          valLabel.textContent = val.toFixed(2);
+          // Real-time backend sync
+          this.state.updateNode(id, { value: val });
         });
       });
     } else {

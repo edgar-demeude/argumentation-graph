@@ -1,161 +1,121 @@
 /**
- * @fileoverview Manages the internal state of the argumentation graph.
+ * @fileoverview Manages the internal state of the argumentation graph by communicating with the backend.
  */
 
-import { calculateSemantics, aggregateScores } from './Semantics.js';
-import { SEMANTICS_METHODS } from '../utils/Constants.js';
-
 export class GraphState {
-  /**
-   * @param {Object} data - The initial data (nodes, colors, cats, etc.).
-   */
   constructor(data) {
+    this.apiUrl = 'http://localhost:8000';
     this.colors = data.colors || {};
     this.cats = data.cats || {};
     this.globalScoresConfig = data.globalScores || [];
-    this.method = SEMANTICS_METHODS.HCATEGORIZER;
-    
-    // Prepare nodes with some defaults
-    this.nodes = (data.nodes || []).map(n => ({
-      ...n,
-      attacks: [...(n.attacks || [])],
-      supports: [...(n.supports || [])],
-      inactive: n.cat === 'state' ? false : (n.cat === 'action' ? !!n.inactive : !!n.inactive),
-      score: n.score || 0,
-      value: n.value !== undefined ? n.value : 0.5,
-    }));
-
+    this.method = 'h-categorizer';
+    this.nodes = data.nodes || [];
     this.links = [];
     this.rebuildLinks();
 
-    // Callbacks for UI updates
-    this.onUpdate = () => {}; // For aggregate scores (sidebar)
-    this.onStructureChange = () => {}; // For graph layout (nodes/links added/removed)
-    this.onVisualChange = () => {}; // For node scores/colors (no layout change)
-    
+    this.onUpdate = () => {};
+    this.onStructureChange = () => {};
+    this.onVisualChange = () => {};
     this.onNodeClick = () => {};
     this.onSelectionChange = () => {};
     
     this.selectedNodeId = null;
-    this.editingId = null;
   }
 
-  /**
-   * Builds the links array from nodes' relationships.
-   */
+  async recalculate() {
+    const res = await fetch(`${this.apiUrl}/graph`);
+    const data = await res.json();
+    this.updateLocalData(data);
+    this.onVisualChange();
+  }
+
+  updateLocalData(data) {
+    this.nodes = data.nodes;
+    this.rebuildLinks();
+    // Signal sidebar update with new category averages
+    const categoryScores = this.calculateCategoryAverages();
+    this.onUpdate(categoryScores);
+  }
+
+  calculateCategoryAverages() {
+    const averages = {};
+    const categories = Object.keys(this.cats).filter(c => c !== 'action' && c !== 'state');
+    categories.forEach(cat => {
+      const nodes = this.nodes.filter(n => n.cat === cat && !n.inactive);
+      if (nodes.length > 0) {
+        averages[cat] = nodes.reduce((sum, n) => sum + (n.score || 0), 0) / nodes.length;
+      } else {
+        averages[cat] = 0;
+      }
+    });
+    return averages;
+  }
+
   rebuildLinks() {
     this.links = [];
     this.nodes.forEach(n => {
       (n.attacks || []).forEach(targetId => {
-        if (typeof targetId === 'string') {
-          this.links.push({ source: n.id, target: targetId, type: 'attack' });
-        }
+        this.links.push({ source: n.id, target: targetId, type: 'attack' });
       });
       (n.supports || []).forEach(targetId => {
-        if (typeof targetId === 'string') {
-          this.links.push({ source: n.id, target: targetId, type: 'support' });
-        }
+        this.links.push({ source: n.id, target: targetId, type: 'support' });
       });
     });
   }
 
-  /**
-   * Recalculates scores and triggers update.
-   */
-  recalculate() {
-    const nodeScores = calculateSemantics(this.nodes, this.method);
-    this.nodes.forEach(n => {
-      n.score = nodeScores[n.id] || 0;
+  async addNode(nodeObj) {
+    const res = await fetch(`${this.apiUrl}/node`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(nodeObj)
     });
-
-    const categoryScores = aggregateScores(this.nodes);
-    this.onUpdate(categoryScores);
-    this.onVisualChange();
-  }
-
-  /**
-   * Adds a new node to the graph.
-   * @param {Object} nodeObj 
-   */
-  addNode(nodeObj) {
-    this.nodes.push({
-      ...nodeObj,
-      attacks: [...(nodeObj.attacks || [])],
-      supports: [...(nodeObj.supports || [])],
-      score: 0,
-    });
-    this.rebuildLinks();
-    this.recalculate();
+    const data = await res.json();
+    this.updateLocalData(data);
     this.onStructureChange();
   }
 
-  /**
-   * Updates an existing node's data.
-   * @param {string} id - The current ID of the node.
-   * @param {Object} newData 
-   */
-  updateNode(id, newData) {
-    const node = this.nodes.find(n => n.id === id);
-    if (!node) return;
+  async updateNode(id, newData) {
+    const structural = newData.id !== undefined || newData.cat !== undefined || newData.attacks !== undefined || newData.supports !== undefined;
 
-    const idChanged = newData.id && newData.id !== id;
-
-    // Update references in other nodes if ID changed
-    if (idChanged) {
-      this.nodes.forEach(n => {
-        if (n.id === id) return;
-        if (n.attacks) n.attacks = n.attacks.map(x => x === id ? newData.id : x);
-        if (n.supports) n.supports = n.supports.map(x => x === id ? newData.id : x);
-      });
+    const res = await fetch(`${this.apiUrl}/node/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newData)
+    });
+    const data = await res.json();
+    this.updateLocalData(data);
+    
+    if (structural) {
+      this.onStructureChange();
+    } else {
+      this.onVisualChange();
     }
-
-    Object.assign(node, newData);
-    this.rebuildLinks();
-    this.recalculate();
-    this.onStructureChange();
   }
 
-  /**
-   * Removes a node and its references.
-   * @param {string} id 
-   */
-  removeNode(id) {
-    this.nodes = this.nodes.filter(n => n.id !== id);
-    this.nodes.forEach(n => {
-      if (n.attacks) n.attacks = n.attacks.filter(x => x !== id);
-      if (n.supports) n.supports = n.supports.filter(x => x !== id);
+  async removeNode(id) {
+    const res = await fetch(`${this.apiUrl}/node/${id}`, {
+      method: 'DELETE'
     });
-    if (this.selectedNodeId === id) this.selectedNodeId = null;
-    this.rebuildLinks();
-    this.recalculate();
+    const data = await res.json();
+    this.updateLocalData(data);
     this.onStructureChange();
   }
 
-  /**
-   * Toggles a node's active/inactive state.
-   * @param {string} id 
-   */
-  toggleNodeActive(id) {
-    const node = this.nodes.find(n => n.id === id);
+  async toggleNodeActive(id) {
+    const node = this.getNode(id);
     if (node && node.cat !== 'state') {
-      node.inactive = !node.inactive;
-      this.recalculate();
+      await this.updateNode(id, { inactive: !node.inactive });
     }
   }
 
-  /**
-   * Finds a node by ID.
-   * @param {string} id 
-   * @returns {Object|null}
-   */
-  getNode(id) {
-    return this.nodes.find(n => n.id === id) || null;
-  }
+getNode(id) {
+  return this.nodes.find(n => n.id === id) || null;
+}
 
-  /**
-   * Exports the current state to JSON.
-   */
-  exportJSON() {
+/**
+ * Exports the current state to JSON.
+ */
+exportJSON() {
     const data = {
       colors: this.colors,
       cats: this.cats,

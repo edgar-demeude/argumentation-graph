@@ -166,13 +166,17 @@ export class GraphRenderer {
 
   /**
    * Main update loop for the graph.
+   * @param {boolean} structural - Whether to restart the force simulation.
    */
-  update() {
+  update(structural = true) {
     this.updateDataBindings();
+    
+    if (structural) {
+      this.simulation.nodes(this.state.nodes);
+      this.simulation.force('link').links(this.state.links);
+      this.simulation.alpha(0.3).restart();
+    }
     this.updateVisuals();
-    this.simulation.nodes(this.state.nodes);
-    this.simulation.force('link').links(this.state.links);
-    this.simulation.alpha(0.3).restart();
   }
 
   /**
@@ -268,6 +272,9 @@ export class GraphRenderer {
    */
   updateVisuals() {
     if (!this.nodeSel) return;
+
+    // Refresh the selection with latest data to ensure scores/active state are current
+    this.nodeSel = this.nodesGroup.selectAll('g.node').data(this.state.nodes, d => d.id);
 
     const { selectedNodeId, colors: catColors } = this.state;
     const currentK = d3.zoomTransform(this.svg.node()).k;

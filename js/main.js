@@ -15,7 +15,9 @@ import { DEFAULT_DATA_PATH } from './utils/Constants.js';
  */
 async function init() {
   try {
-    const data = await fetchData(DEFAULT_DATA_PATH);
+    const apiUrl = 'http://localhost:8000';
+    const response = await fetch(`${apiUrl}/graph`);
+    const data = await response.json();
     
     // 1. Initialize logic state
     const state = new GraphState(data);
@@ -72,10 +74,17 @@ async function init() {
     sidebar.formula = formula;
 
     // 4. Connect renderer and state
-    state.onStructureChange = () => renderer.update();
-    state.onVisualChange = () => renderer.updateVisuals();
-    state.recalculate(); // Initial calculation
-    renderer.update(); // Initial render
+    state.onStructureChange = () => renderer.update(true);
+    state.onVisualChange = async () => {
+      // Refresh sidebar category scores from current local nodes
+      const categoryScores = state.calculateCategoryAverages();
+      state.onUpdate(categoryScores);
+      renderer.update(false);
+    };
+    state.onNodeClick = (node) => {};
+    
+    await state.recalculate(); // Initial calculation
+    renderer.update(true); // Initial render
 
     // 5. Global export button
     const exportBtn = document.getElementById('btn-export');
