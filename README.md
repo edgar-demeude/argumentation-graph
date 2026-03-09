@@ -7,8 +7,9 @@ A modular, interactive web application for modeling and analyzing ethical argume
 
 ## Features
 
+- **Agent-based Simulation**: Run simulations where autonomous agents move on a grid and make decisions based on the current argumentation graph.
 - **Interactive D3 Graph**: Visualize arguments as nodes and their relationships (attacks, supports, influences) as edges.
-- **Gradual Semantics**: Real-time calculation of node scores (0.0 to 1.0) using an iterative fixed-point algorithm.
+- **Gradual Semantics**: Real-time calculation of node scores (0.0 to 1.0) using iterative fixed-point algorithms (FastAPI backend).
 - **Dynamic Influences**: Model conditional relationships that change based on the "World State" (e.g., how drought affects the value of watering).
 - **Argument Editor**: Create, update, and delete nodes and relationships directly from the UI.
 - **Export/Import**: Save your graph configuration as a JSON file for later use.
@@ -16,12 +17,13 @@ A modular, interactive web application for modeling and analyzing ethical argume
 
 ## Architecture
 
-The project is built with a modern modular structure (ES Modules):
+The project is built with a modular structure:
 
-- **Logic Layer**: Centralized state management and semantic algorithms (`js/logic/`).
-- **Rendering Layer**: Specialized D3.js components for graph visualization (`js/graph/`).
-- **UI Layer**: Modular sidebar and form components (`js/ui/`).
-- **Configuration**: Application-wide constants and styling variables (`js/utils/Constants.js`).
+- **Backend (Python/FastAPI)**: Handles the argumentation logic, gradual semantics calculations, and agent-based simulation (`backend/`).
+- **Frontend (ES Modules)**: 
+    - **Logic Layer**: Local state management and UI synchronization (`js/logic/`).
+    - **Rendering Layer**: D3.js components for graph visualization and grid simulation (`js/graph/`).
+    - **UI Layer**: Modular sidebar and form components (`js/ui/`).
 
 ## How to Use
 
@@ -29,15 +31,32 @@ The project is built with a modern modular structure (ES Modules):
 2.  **Toggle Active**: Right-click a node to deactivate it (it will be grayed out and excluded from score calculations).
 3.  **Adjust World State**: Use the sliders in the right panel to change the intensity of different states.
 4.  **Edit Graph**: Use the left panel to add new arguments or modify existing ones.
-5.  **Export**: Click "Export JSON" to download your current graph state.
+5.  **Run Simulation**: Expand the "Grid" panel, configure the number of agents and steps, and click "Start Simulation".
+6.  **Export**: Click "Export JSON" to download your current graph state.
 
 ## Local Development
 
-Since the application uses ES Modules and fetches data from a JSON file, it must be served via a web server (it won't work by simply opening `index.html` in a browser due to CORS policies).
+The application now consists of a **FastAPI backend** (for logic and simulation) and a **Vanilla JS frontend**. 
+
+### 1. Backend Setup
+The backend requires Python 3.8+ and its dependencies.
+
+```bash
+# Install dependencies
+pip install -r backend/requirements.txt
+
+# Run the backend (from the root directory)
+python -m backend.main
+```
+The backend will run on `http://localhost:8000`.
+
+### 2. Frontend Setup
+Since the application uses ES Modules, it must be served via a web server. The frontend is configured to communicate with the backend on port 8000.
 
 **Option 1: Python**
 ```bash
-python -m http.server 8000
+# Run from the root directory on a different port (e.g., 8080)
+python -m http.server 8080
 ```
 
 **Option 2: Node.js (serve)**
@@ -45,7 +64,7 @@ python -m http.server 8000
 npx serve .
 ```
 
-Then visit `http://localhost:8000`.
+Then visit `http://localhost:8080` in your browser.
 
 ## Credits
 

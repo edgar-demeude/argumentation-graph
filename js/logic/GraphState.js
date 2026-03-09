@@ -25,13 +25,33 @@ export class GraphState {
   async recalculate() {
     const res = await fetch(`${this.apiUrl}/graph`);
     const data = await res.json();
-    this.updateLocalData(data);
+    this.updateLocalData(data, false);
     this.onVisualChange();
   }
 
-  updateLocalData(data) {
-    this.nodes = data.nodes;
-    this.rebuildLinks();
+  updateLocalData(data, structural = true) {
+    // 1. Merge nodes to preserve D3 simulation state (x, y, vx, vy, etc.)
+    const newNodeMap = new Map(data.nodes.map(n => [n.id, n]));
+    
+    // Update existing nodes and remove old ones
+    this.nodes = this.nodes.filter(n => {
+      if (newNodeMap.has(n.id)) {
+        const newData = newNodeMap.get(n.id);
+        Object.assign(n, newData); // Merges only properties from backend
+        newNodeMap.delete(n.id);
+        return true;
+      }
+      return false;
+    });
+    
+    // Add new nodes
+    newNodeMap.forEach(n => this.nodes.push(n));
+
+    // 2. Rebuild links ONLY if structure changed
+    if (structural) {
+      this.rebuildLinks();
+    }
+
     // Signal sidebar update with new category averages
     const categoryScores = this.calculateCategoryAverages();
     this.onUpdate(categoryScores);
@@ -70,7 +90,7 @@ export class GraphState {
       body: JSON.stringify(nodeObj)
     });
     const data = await res.json();
-    this.updateLocalData(data);
+    this.updateLocalData(data, true);
     this.onStructureChange();
   }
 
@@ -83,7 +103,7 @@ export class GraphState {
       body: JSON.stringify(newData)
     });
     const data = await res.json();
-    this.updateLocalData(data);
+    this.updateLocalData(data, structural);
     
     if (structural) {
       this.onStructureChange();
@@ -97,7 +117,7 @@ export class GraphState {
       method: 'DELETE'
     });
     const data = await res.json();
-    this.updateLocalData(data);
+    this.updateLocalData(data, true);
     this.onStructureChange();
   }
 

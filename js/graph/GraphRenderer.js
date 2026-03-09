@@ -259,11 +259,23 @@ export class GraphRenderer {
   updateNodeLabels(g) {
     g.each(function(d) {
       const el = d3.select(this);
-      el.selectAll('.node-label').remove();
+      const existingLabels = el.selectAll('.node-label');
       const lines = d.label.split('\n');
-      lines.forEach((line, i) => {
-        el.append('text').attr('class', 'node-label').text(line);
-      });
+      
+      // Simple check to avoid redraw if content is same
+      let same = existingLabels.size() === lines.length;
+      if (same) {
+        existingLabels.each(function(_, i) {
+          if (d3.select(this).text() !== lines[i]) same = false;
+        });
+      }
+
+      if (!same) {
+        existingLabels.remove();
+        lines.forEach((line) => {
+          el.append('text').attr('class', 'node-label').text(line);
+        });
+      }
     });
   }
 
@@ -273,8 +285,8 @@ export class GraphRenderer {
   updateVisuals() {
     if (!this.nodeSel) return;
 
-    // Refresh the selection with latest data to ensure scores/active state are current
-    this.nodeSel = this.nodesGroup.selectAll('g.node').data(this.state.nodes, d => d.id);
+    // We don't need to re-bind data here as updateDataBindings already did it
+    // and preserved object identity ensures the data is current.
 
     const { selectedNodeId, colors: catColors } = this.state;
     const currentK = d3.zoomTransform(this.svg.node()).k;
@@ -326,8 +338,16 @@ export class GraphRenderer {
     if (selectedNodeId) {
       const relatedIds = this.getRelatedNodeIds(selectedNodeId);
       this.nodeSel.classed('dimmed', n => !relatedIds.has(n.id));
-      this.linkSel.classed('dimmed', l => l.source.id !== selectedNodeId && l.target.id !== selectedNodeId);
-      this.linkSel.classed('highlighted', l => l.source.id === selectedNodeId || l.target.id === selectedNodeId);
+      this.linkSel.classed('dimmed', l => {
+        const s = typeof l.source === 'object' ? l.source.id : l.source;
+        const t = typeof l.target === 'object' ? l.target.id : l.target;
+        return s !== selectedNodeId && t !== selectedNodeId;
+      });
+      this.linkSel.classed('highlighted', l => {
+        const s = typeof l.source === 'object' ? l.source.id : l.source;
+        const t = typeof l.target === 'object' ? l.target.id : l.target;
+        return s === selectedNodeId || t === selectedNodeId;
+      });
     } else {
       this.nodeSel.classed('dimmed', false);
       this.linkSel.classed('dimmed', false);
