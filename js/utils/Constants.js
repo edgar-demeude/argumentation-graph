@@ -36,10 +36,8 @@ export const COLORS = {
 export const SEMANTICS_METHODS = {
   HCATEGORIZER: "h-categorizer",
   MAXBASED: "max-based",
-  DRASTIC: "drastic",
-  DRASTIC_LINEAR: "drastic-linear",
 };
 
-// export const DEFAULT_DATA_PATH = "data.json";
+export const DEFAULT_DATA_PATH = "data.json";
+// export const DEFAULT_DATA_PATH = "data2.json";
 // export const DEFAULT_DATA_PATH = "data-small.json";
-export const DEFAULT_DATA_PATH = "data-small2.json";

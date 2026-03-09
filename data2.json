@@ -22,8 +22,8 @@
       "cat": "action",
       "score": 0.0,
       "desc": "Choose flowers that thrive in the current season.",
-      "attacks": ["ECO2", "ECO1"],
-      "supports": ["ENV1"]
+      "attacks": [],
+      "supports": []
     },
     {
       "id": "A1",
@@ -31,8 +31,8 @@
       "cat": "action",
       "score": 0.0,
       "desc": "Select popular flower varieties to maximize sales.",
-      "attacks": ["ENV1"],
-      "supports": ["ECO2"]
+      "attacks": [],
+      "supports": []
     },
     {
       "id": "A2",
@@ -41,7 +41,7 @@
       "score": 0.0,
       "desc": "Transform kitchen scraps into nutrient-rich soil amendment.",
       "attacks": [],
-      "supports": ["ENV1"]
+      "supports": []
     },
     {
       "id": "A3",
@@ -49,8 +49,8 @@
       "cat": "action",
       "score": 0.0,
       "desc": "Apply chemical treatments to control pests.",
-      "attacks": ["ENV2", "ENV1"],
-      "supports": ["ECO1"]
+      "attacks": [],
+      "supports": []
     },
     {
       "id": "A4",
@@ -58,8 +58,8 @@
       "cat": "action",
       "score": 0.0,
       "desc": "Implement a water-efficient irrigation system that delivers water directly to plant roots.",
-      "attacks": ["ECO1"],
-      "supports": ["ENV3"]
+      "attacks": [],
+      "supports": ["STATE2"]
     },
     {
       "id": "A5",
@@ -67,8 +67,8 @@
       "cat": "action",
       "score": 0.0,
       "desc": "Use tap water to maintain hydration.",
-      "attacks": ["ENV3"],
-      "supports": ["ECO1"]
+      "attacks": ["STATE2"],
+      "supports": []
     },
 
     {
