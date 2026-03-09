@@ -49,7 +49,7 @@
       "cat": "action",
       "score": 0.0,
       "desc": "Apply chemical treatments to control pests.",
-      "attacks": ["ENV2", "ENV1"],
+      "attacks": ["ENV2", "ENV1", "ECO3"],
       "supports": ["ECO1"]
     },
     {
@@ -59,7 +59,7 @@
       "score": 0.0,
       "desc": "Implement a water-efficient irrigation system that delivers water directly to plant roots.",
       "attacks": ["ECO1"],
-      "supports": ["ENV3"]
+      "supports": ["ENV3", "ECO3"]
     },
     {
       "id": "A5",
@@ -67,7 +67,7 @@
       "cat": "action",
       "score": 0.0,
       "desc": "Use tap water to maintain hydration.",
-      "attacks": ["ENV3"],
+      "attacks": ["ENV3", "ECO3"],
       "supports": ["ECO1"]
     },
 
@@ -96,7 +96,7 @@
       "value": 0.5,
       "desc": "A measure of the financial returns from gardening activities.",
       "attacks": [],
-      "supports": ["ECO2"]
+      "supports": ["ECO2", "ECO3"]
     },
     {
       "id": "STATE4",
@@ -150,6 +150,16 @@
       "cat": "eco",
       "score": 0.0,
       "desc": "Growing popular flower varieties can increase sales and profitability.",
+      "attacks": [],
+      "supports": []
+    }
+    ,
+    {
+      "id": "ECO3",
+      "label": "We should reduce costs",
+      "cat": "eco",
+      "score": 0.0,
+      "desc": "Minimizing expenses can improve overall profitability.",
       "attacks": [],
       "supports": []
     }
