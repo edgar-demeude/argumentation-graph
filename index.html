@@ -28,10 +28,10 @@
 
   <div class="workspace">
 
-    <!-- Left sidebar: Argument Creator -->
+    <!-- Left sidebar: Node Creator -->
     <aside class="sidebar sidebar-left">
       <div class="panel-header">
-        <h2>Argument Editor</h2>
+        <h2>Node Editor</h2>
       </div>
 
       <div class="creator-form" id="creator-form">
@@ -64,7 +64,7 @@
 
         <!-- Static Attacks -->
         <div class="field-group">
-          <label for="attacks-input">Static Attacks</label>
+          <label for="attacks-input">Violations / Attacks</label>
           <div class="tag-row">
             <input id="attacks-input" type="text" class="field-input tag-input" list="attacks-list" placeholder="Target ID">
             <datalist id="attacks-list"></datalist>
@@ -75,7 +75,7 @@
 
         <!-- Static Supports -->
         <div class="field-group">
-          <label for="supports-input">Static Supports</label>
+          <label for="supports-input">Promotions / Supports / Value</label>
           <div class="tag-row">
             <input id="supports-input" type="text" class="field-input tag-input" list="supports-list" placeholder="Target ID">
             <datalist id="supports-list"></datalist>
@@ -89,8 +89,8 @@
 
         <!-- Buttons -->
         <div class="form-btn-row" id="form-btn-row">
-          <button id="btn-create" class="create-btn form-btn-create">Create argument</button>
-          <button id="btn-delete" class="delete-btn form-btn-delete" data-confirm="false">Delete argument</button>
+          <button id="btn-create" class="create-btn form-btn-create">Create node</button>
+          <button id="btn-delete" class="delete-btn form-btn-delete" data-confirm="false">Delete node</button>
         </div>
       </div>
     </aside>
@@ -108,18 +108,30 @@
       <!-- Legend -->
       <section class="legend">
         <h2>Ethical Dimensions</h2>
-        <div class="legend-item"><div class="legend-dot" style="background:var(--action)"></div>Action</div>
-        <div class="legend-item"><div class="legend-dot" style="background:var(--env)"></div>Environmental Beliefs</div>
-        <div class="legend-item"><div class="legend-dot" style="background:var(--eco)"></div>Economic Beliefs</div>
-        <div class="legend-item"><div class="legend-dot" style="background:var(--state)"></div>World State</div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:var(--action); border-radius: 50%;"></div>
+          Action (Circle)
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:var(--env); clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%); border-radius: 0;"></div>
+          Environmental Belief (Hexagon)
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:var(--eco); clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%); border-radius: 0;"></div>
+          Economic Belief (Hexagon)
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:var(--state); transform: rotate(45deg); border-radius: 0;"></div>
+          World State (Diamond)
+        </div>
         
         <div class="legend-attack">
           <div class="attack-line"></div>
-          <span>Static Attack</span>
+          <span>Violates / Attacks</span>
         </div>
         <div class="legend-support">
           <div class="support-line dotted"></div>
-          <span>Static Support</span>
+          <span>Promotes / Supports / Value</span>
         </div>
         
         <div class="legend-inactive-hint">
@@ -154,6 +166,11 @@
       <footer class="score-section">
         <h2>Category Scores (Average)</h2>
         <div class="global-scores" id="global-scores"></div>
+        
+        <div class="final-score-box">
+          <div class="final-score-label">Final Reward Score (Balanced Geometric Mean)</div>
+          <div id="final-reward-score" class="final-score-val">0.00</div>
+        </div>
       </footer>
     </aside>
   </div>

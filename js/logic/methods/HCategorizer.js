@@ -52,7 +52,6 @@ export function calculateHCategorizer(nodes, categoryWeights, stateMultipliers, 
 
     nodes.forEach(n => {
       if (!activeIds.has(n.id)) { nextScores[n.id] = 0; return; }
-      if (n.cat === 'state') { nextScores[n.id] = n.value || 0; return; }
 
       let attackSum = 0;
       let supportSum = 0;
@@ -66,8 +65,14 @@ export function calculateHCategorizer(nodes, categoryWeights, stateMultipliers, 
         supportSum += weight * (currentScores[srcId] || 0);
       });
 
-      const nodeMultiplier = stateMultipliers[n.id];
-      nextScores[n.id] = ((1 + supportSum) / (2 + attackSum + supportSum)) * nodeMultiplier;
+      if (n.cat === 'state') {
+        // For state nodes, we use the initial value as the base
+        const baseValue = n.value || 0;
+        nextScores[n.id] = (baseValue + supportSum) / (1 + attackSum + supportSum);
+      } else {
+        const nodeMultiplier = stateMultipliers[n.id];
+        nextScores[n.id] = ((1 + supportSum) / (2 + attackSum + supportSum)) * nodeMultiplier;
+      }
 
       const diff = Math.abs(nextScores[n.id] - currentScores[n.id]);
       if (diff > maxDiff) maxDiff = diff;

@@ -59,8 +59,8 @@
       "cat": "state",
       "value": 0.5,
       "desc": "A measure of soil quality based on nutrient content and structure.",
-      "attacks": ["ENV1"],
-      "supports": []
+      "attacks": [],
+      "supports": ["ENV1"]
     },
     {
       "id": "STATE2",

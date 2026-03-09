@@ -10,6 +10,7 @@ export class Sidebar {
     this.state = graphState;
     this.statesContainer = document.getElementById('world-states-container');
     this.scoresContainer = document.getElementById('global-scores');
+    this.finalRewardContainer = document.getElementById('final-reward-score');
     
     this.init();
     this.setupMethodListener();
@@ -90,16 +91,14 @@ export class Sidebar {
     }
   }
 
-  /**
-   * Renders the aggregated scores for value belief categories.
-   * @param {Object} categoryScores 
-   */
   renderGlobalScores(categoryScores) {
     if (!this.scoresContainer) return;
 
-    this.scoresContainer.innerHTML = Object.entries(this.state.cats)
-      .filter(([cat]) => cat !== 'action' && cat !== 'state')
-      .map(([cat, label]) => {
+    const categories = Object.keys(this.state.cats).filter(cat => cat !== 'action' && cat !== 'state');
+
+    this.scoresContainer.innerHTML = categories
+      .map(cat => {
+        const label = this.state.cats[cat];
         const val = categoryScores[cat] || 0;
         const color = this.state.colors[cat] || '#ffffff';
         return `
@@ -109,5 +108,20 @@ export class Sidebar {
           </div>
         `;
       }).join('');
+
+    // Final Reward Score: Geometric Mean penalized by divergence
+    if (this.finalRewardContainer && categories.length > 0) {
+      const vals = categories.map(cat => categoryScores[cat] || 0);
+      const product = vals.reduce((acc, v) => acc * v, 1);
+      const geometricMean = Math.pow(product, 1 / categories.length);
+      
+      const max = Math.max(...vals);
+      const min = Math.min(...vals);
+      const spread = max - min;
+      const balanceFactor = 1 - spread;
+      
+      const penalizedScore = geometricMean * balanceFactor;
+      this.finalRewardContainer.textContent = Math.max(0, penalizedScore).toFixed(2);
+    }
   }
 }

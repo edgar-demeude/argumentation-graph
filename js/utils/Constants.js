@@ -15,6 +15,12 @@ export const GRAPH_CONFIG = {
   curvature: 0.0,
 };
 
+export const NODE_SHAPES = {
+  ACTION: 'circle',
+  STATE: 'diamond',
+  BELIEF: 'hexagon'
+};
+
 export const COLORS = {
   action: "#9b8fd4",
   env: "#4caf78",
@@ -34,4 +40,6 @@ export const SEMANTICS_METHODS = {
   DRASTIC_LINEAR: "drastic-linear",
 };
 
-export const DEFAULT_DATA_PATH = "data.json";
+// export const DEFAULT_DATA_PATH = "data.json";
+// export const DEFAULT_DATA_PATH = "data-small.json";
+export const DEFAULT_DATA_PATH = "data-small2.json";

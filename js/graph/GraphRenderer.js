@@ -2,7 +2,39 @@
  * @fileoverview Handles D3.js force-directed graph rendering.
  */
 
-import { GRAPH_CONFIG, COLORS } from '../utils/Constants.js';
+import { GRAPH_CONFIG, COLORS, NODE_SHAPES } from '../utils/Constants.js';
+
+const getShapePath = (type, r) => {
+  if (type === NODE_SHAPES.STATE) {
+    // Start at top: (0, -r)
+    return `M0,-${r} L${r},0 L0,${r} L-${r},0 Z`;
+  }
+  if (type === NODE_SHAPES.BELIEF) {
+    // Start at top: 270 degrees (or -90)
+    let path = "";
+    for (let i = 0; i < 6; i++) {
+      const angle = (i * 60 - 90) * Math.PI / 180;
+      const x = r * Math.cos(angle);
+      const y = r * Math.sin(angle);
+      path += (i === 0 ? "M" : "L") + x + "," + y;
+    }
+    return path + "Z";
+  }
+  // Default to circle (action) - Starting at (0, -r)
+  return `M0,-${r} A${r},${r} 0 1,1 0,${r} A${r},${r} 0 1,1 0,-${r} Z`;
+};
+
+const getShapePerimeter = (type, r) => {
+  if (type === NODE_SHAPES.STATE) return 4 * r * Math.sqrt(2);
+  if (type === NODE_SHAPES.BELIEF) return 6 * r;
+  return 2 * Math.PI * r;
+};
+
+const getNodeType = (cat) => {
+  if (cat === 'action') return NODE_SHAPES.ACTION;
+  if (cat === 'state') return NODE_SHAPES.STATE;
+  return NODE_SHAPES.BELIEF;
+};
 
 export class GraphRenderer {
   /**
@@ -195,18 +227,26 @@ export class GraphRenderer {
    * Appends initial SVG elements for a node.
    */
   createNodeVisuals(g) {
-    g.append('circle').attr('class', 'node-bg').attr('r', GRAPH_CONFIG.nodeRadius);
-    
-    g.append('circle')
-      .attr('class', 'score-ring')
-      .attr('r', GRAPH_CONFIG.nodeRadius)
-      .attr('fill', 'none')
-      .attr('stroke-opacity', 0.4)
-      .attr('stroke-width', 4)
-      .attr('transform', 'rotate(-90)');
+    const r = GRAPH_CONFIG.nodeRadius;
+    g.each(function(d) {
+      const el = d3.select(this);
+      const type = getNodeType(d.cat);
+      const path = getShapePath(type, r);
 
-    g.append('text').attr('class', 'node-score').attr('text-anchor', 'middle');
-    g.append('text').attr('class', 'node-id').attr('text-anchor', 'middle');
+      el.append('path')
+        .attr('class', 'node-bg')
+        .attr('d', path);
+      
+      el.append('path')
+        .attr('class', 'score-ring')
+        .attr('d', path)
+        .attr('fill', 'none')
+        .attr('stroke-opacity', 0.4)
+        .attr('stroke-width', 4);
+
+      el.append('text').attr('class', 'node-score').attr('text-anchor', 'middle');
+      el.append('text').attr('class', 'node-id').attr('text-anchor', 'middle');
+    });
     
     // Labels (split by newline)
     this.updateNodeLabels(g);
@@ -231,6 +271,7 @@ export class GraphRenderer {
 
     const { selectedNodeId, colors: catColors } = this.state;
     const currentK = d3.zoomTransform(this.svg.node()).k;
+    const r = GRAPH_CONFIG.nodeRadius;
 
     // Node updates
     this.nodeSel.each(function(d) {
@@ -243,21 +284,25 @@ export class GraphRenderer {
       g.classed('selected', isSelected);
 
       const color = isInactive ? COLORS.inactive : catColor;
+      const type = getNodeType(d.cat);
+      const path = getShapePath(type, r);
       
       g.select('.node-bg')
+        .attr('d', path)
         .attr('fill', color + '22')
         .attr('stroke', color);
 
-      const circ = 2 * Math.PI * GRAPH_CONFIG.nodeRadius;
-      const dash = d.cat === 'state' ? '0 1' : `${(d.score || 0) * circ} ${circ}`;
+      const peri = getShapePerimeter(type, r);
+      const dash = `${(d.score || 0) * peri} ${peri}`;
       
       g.select('.score-ring')
+        .attr('d', path)
         .attr('stroke', color)
         .attr('stroke-dasharray', dash);
 
       g.select('.node-score')
         .attr('fill', color)
-        .text(d.cat === 'state' ? `${(d.value * 100).toFixed(0)}%` : (d.score || 0).toFixed(2));
+        .text(d.cat === 'state' ? `${(d.score * 100).toFixed(0)}%` : (d.score || 0).toFixed(2));
 
       g.select('.node-id')
         .attr('fill', color)

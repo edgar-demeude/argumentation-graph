@@ -1,0 +1,84 @@
+{
+  "colors": {
+    "action": "#9b8fd4",
+    "env": "#4caf78",
+    "eco": "#dca450",
+    "state": "#4ab3f4"
+  },
+  "cats": {
+    "action": "Gardening Actions",
+    "env": "Environmental Health",
+    "eco": "Economic Prosperity",
+    "state": "World State"
+  },
+  "globalScores": [
+    { "label": "Eco-Balance", "cat": "env", "value": 0.0 },
+    { "label": "Profitability", "cat": "eco", "value": 0.0 }
+  ],
+  "nodes": [
+    {
+      "id": "A1",
+      "label": "Use drip \nirrigation",
+      "cat": "action",
+      "score": 0.0,
+      "desc": "Implement a water-efficient irrigation system that delivers water directly to plant roots.",
+      "attacks": ["ECO1"],
+      "supports": ["ENV3"]
+    },
+    {
+      "id": "A2",
+      "label": "Water the \nflowers",
+      "cat": "action",
+      "score": 0.0,
+      "desc": "Use tap water to maintain hydration.",
+      "attacks": ["ENV3"],
+      "supports": ["ECO1"]
+    },
+    {
+      "id": "STATE1",
+      "label": "Water \navailability (%)",
+      "cat": "state",
+      "value": 0.5,
+      "desc": "A measure of water resources available for plant growth.",
+      "attacks": [],
+      "supports": ["ENV3"]
+    },
+    {
+      "id": "STATE2",
+      "label": "Revenue (%)",
+      "cat": "state",
+      "value": 0.5,
+      "desc": "A measure of the financial returns from gardening activities.",
+      "attacks": [],
+      "supports": ["ECO1"]
+    },
+    {
+      "id": "STATE3",
+      "label": "Flowers \nhealth (%)",
+      "cat": "state",
+      "value": 0.5,
+      "desc": "An indicator of the overall health and vitality of the flowers.",
+      "attacks": [],
+      "supports": ["ECO1"]
+    },
+
+    { 
+      "id": "ENV3",
+      "label": "We should \npreserve water",
+      "cat": "env",
+      "score": 0.0,
+      "desc": "Water is a finite resource essential for plant growth.",
+      "attacks": [],
+      "supports": []
+    },
+    {
+      "id": "ECO1",
+      "label": "We should have \ngood productivity",
+      "cat": "eco",
+      "score": 0.0,
+      "desc": "Sustainable farming practices can enhance productivity while minimizing environmental impact.",
+      "attacks": [],
+      "supports": []
+    }
+  ]
+}

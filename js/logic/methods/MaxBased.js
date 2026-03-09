@@ -50,7 +50,6 @@ export function calculateMaxBased(nodes, categoryWeights, stateMultipliers, acti
 
     nodes.forEach(n => {
       if (!activeIds.has(n.id)) { nextScores[n.id] = 0; return; }
-      if (n.cat === 'state') { nextScores[n.id] = n.value || 0; return; }
 
       let maxAttack = 0;
       let maxSupport = 0;
@@ -66,8 +65,13 @@ export function calculateMaxBased(nodes, categoryWeights, stateMultipliers, acti
         if (val > maxSupport) maxSupport = val;
       });
 
-      const nodeMultiplier = stateMultipliers[n.id];
-      nextScores[n.id] = ((1 + maxSupport) / (1 + maxAttack + maxSupport)) * nodeMultiplier;
+      if (n.cat === 'state') {
+        const baseValue = n.value || 0;
+        nextScores[n.id] = (baseValue + maxSupport) / (1 + maxAttack + maxSupport);
+      } else {
+        const nodeMultiplier = stateMultipliers[n.id];
+        nextScores[n.id] = ((1 + maxSupport) / (1 + maxAttack + maxSupport)) * nodeMultiplier;
+      }
 
       const diff = Math.abs(nextScores[n.id] - currentScores[n.id]);
       if (diff > maxDiff) maxDiff = diff;

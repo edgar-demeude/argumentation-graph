@@ -150,11 +150,11 @@ export class Creator {
       setMode(mode) {
         if (mode === 'create') {
           this.btnRow.classList.remove('edit-mode');
-          if (this.panelTitle) this.panelTitle.textContent = 'New argument';
+          if (this.panelTitle) this.panelTitle.textContent = 'New node';
           this.btnCreate.style.display = 'block';
         } else {
           this.btnRow.classList.add('edit-mode');
-          if (this.panelTitle) this.panelTitle.textContent = 'Update argument';
+          if (this.panelTitle) this.panelTitle.textContent = 'Update node';
           this.btnCreate.style.display = 'none';
         }
       }
@@ -254,7 +254,7 @@ export class Creator {
       this.btnDelete.textContent = 'Confirm?';
       setTimeout(() => {
         this.btnDelete.dataset.confirm = 'false';
-        this.btnDelete.textContent = 'Delete argument';
+        this.btnDelete.textContent = 'Delete node';
       }, 3000);
     }
   }
