@@ -4,6 +4,7 @@
 
 import { GraphState } from './logic/GraphState.js';
 import { GraphRenderer } from './graph/GraphRenderer.js';
+import { Simulation } from './logic/Simulation.js';
 import { Sidebar } from './ui/Sidebar.js';
 import { Creator } from './ui/Creator.js';
 import { Formula } from './ui/Formula.js';
@@ -20,7 +21,49 @@ async function init() {
     const state = new GraphState(data);
 
     // 2. Initialize renderer
-    const renderer = new GraphRenderer('#svg', '#graph-container', state);
+    const renderer = new GraphRenderer('#svg', '#graph-view', state);
+    const simulation = new Simulation('simulation-canvas', 'grid-dashboard', state);
+    
+    // 2b. Grid Toggle Logic
+    const gridView = document.getElementById('grid-view');
+    const btnToggle = document.getElementById('btn-toggle-grid');
+    if (btnToggle && gridView) {
+      btnToggle.onclick = () => {
+        const isCollapsed = gridView.classList.toggle('grid-collapsed');
+        btnToggle.textContent = isCollapsed ? '▲ Grid' : '▼ Grid';
+        // Force simulation to adjust to new dimensions after transition
+        setTimeout(() => {
+          renderer.width = document.querySelector('#graph-view').clientWidth;
+          renderer.height = document.querySelector('#graph-view').clientHeight;
+          renderer.simulation.force('center', d3.forceCenter(renderer.width / 2, renderer.height / 2));
+          renderer.update();
+          simulation.render(); // Redraw grid
+        }, 450); 
+      };
+    }
+
+    // 2c. Start Simulation Logic
+    const btnStartSim = document.getElementById('btn-start-sim');
+    if (btnStartSim) {
+      btnStartSim.onclick = () => {
+        // Expand grid if collapsed
+        if (gridView.classList.contains('grid-collapsed')) {
+          btnToggle.click();
+        }
+
+        const numAgents = parseInt(document.getElementById('sim-agents').value);
+        const maxSteps = parseInt(document.getElementById('sim-steps').value);
+        const gridSize = parseInt(document.getElementById('sim-grid').value);
+
+        simulation.init(numAgents, maxSteps, gridSize);
+        simulation.start();
+      };
+    }
+
+    const btnPrev = document.getElementById('btn-prev-step');
+    const btnNext = document.getElementById('btn-next-step');
+    if (btnPrev) btnPrev.onclick = () => simulation.previous();
+    if (btnNext) btnNext.onclick = () => simulation.next();
     
     // 3. Initialize UI panels
     const sidebar = new Sidebar(state);

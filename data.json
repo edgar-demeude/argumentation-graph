@@ -75,7 +75,7 @@
       "id": "STATE1",
       "label": "Soil \nhealth (%)",
       "cat": "state",
-      "value": 0.5,
+      "value": 1.0,
       "desc": "A measure of soil quality based on nutrient content and structure.",
       "attacks": [],
       "supports": ["ENV1", "ENV2"]
@@ -84,7 +84,7 @@
       "id": "STATE2",
       "label": "Water \navailability (%)",
       "cat": "state",
-      "value": 0.5,
+      "value": 1.0,
       "desc": "A measure of water resources available for plant growth.",
       "attacks": [],
       "supports": ["ENV3"]
@@ -93,7 +93,7 @@
       "id": "STATE3",
       "label": "Revenues (%)",
       "cat": "state",
-      "value": 0.5,
+      "value": 0.0,
       "desc": "A measure of the financial returns from gardening activities.",
       "attacks": [],
       "supports": ["ECO2", "ECO3"]
@@ -102,7 +102,7 @@
       "id": "STATE4",
       "label": "Flower vitality (%)",
       "cat": "state",
-      "value": 0.5,
+      "value": 0.0,
       "desc": "A measure of the health and vigor of the flowers.",
       "attacks": [],
       "supports": ["ECO1", "ENV1"]

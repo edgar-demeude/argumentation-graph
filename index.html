@@ -28,7 +28,7 @@
 
   <div class="workspace">
 
-    <!-- Left sidebar: Node Creator -->
+    <!-- Left sidebar: Node Creator & Simulation -->
     <aside class="sidebar sidebar-left">
       <div class="panel-header">
         <h2>Node Editor</h2>
@@ -93,13 +93,54 @@
           <button id="btn-delete" class="delete-btn form-btn-delete" data-confirm="false">Delete node</button>
         </div>
       </div>
+
+      <div class="simulation-section">
+        <div class="panel-header">
+          <h2>Simulation</h2>
+        </div>
+        <div class="sim-form">
+          <div class="field-group">
+            <label>Agents</label>
+            <input type="number" id="sim-agents" class="field-input" value="1" min="1" max="10">
+          </div>
+          <div class="field-group">
+            <label>Steps</label>
+            <input type="number" id="sim-steps" class="field-input" value="25" min="1" max="1000">
+          </div>
+          <div class="field-group">
+            <label>Grid Size</label>
+            <input type="number" id="sim-grid" class="field-input" value="10" min="5" max="50">
+          </div>
+          <button id="btn-start-sim" class="create-btn" style="margin-top: 10px; background: rgba(93, 186, 111, 0.2);">Start Simulation</button>
+        </div>
+      </div>
     </aside>
 
-    <!-- Centre — D3 Graph Canvas -->
-    <main id="graph-container">
-      <svg id="svg"></svg>
-      <div class="instructions">
-        CLICK: Select node · RIGHT-CLICK: Toggle active · DRAG: Move · SCROLL: Zoom
+    <!-- Centre — Main Workspace -->
+    <main id="main-canvas">
+      <div id="graph-view" class="view-panel">
+        <svg id="svg"></svg>
+        <button id="btn-toggle-grid" class="toggle-grid-btn">▲ Grid</button>
+        <div class="instructions">
+          CLICK: Select node · RIGHT-CLICK: Toggle active · DRAG: Move · SCROLL: Zoom
+        </div>
+      </div>
+
+      <div id="grid-view" class="view-panel grid-collapsed">
+        <div class="grid-header">
+          <h3>Simulation Grid</h3>
+          <div class="sim-status">
+            <button id="btn-prev-step" class="step-btn">◀</button>
+            <span class="step-counter">Step: <span id="current-step">0</span> / <span id="total-steps">0</span></span>
+            <button id="btn-next-step" class="step-btn">▶</button>
+          </div>
+        </div>
+        <div id="grid-dashboard" class="grid-dashboard">
+          <!-- Dynamic state values will be injected here -->
+        </div>
+        <div id="grid-canvas-container">
+          <canvas id="simulation-canvas"></canvas>
+        </div>
       </div>
     </main>
 
